@@ -19,7 +19,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import EmployeePanel from "./pages/qrCodeGeneration/EmployeePanel";
 import EmployeeCardView from "./pages/qrCodeGeneration/EmployeeCardView";
 import PublicEmployeeView from "./pages/qrCodeGeneration/PublicEmployeeView";
-import CompanySignature from "./pages/CompanySIgnature";
+import CompanySignature from "./pages/CompanySignature";
 import EmployeeImageUpload from "./pages/EmployeeImageUpload";
 
 function RequireAuth() {
