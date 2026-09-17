@@ -1,0 +1,361 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Install test dependencies and configure Vitest": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203777854
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203793882
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203931053
+      }
+    ],
+    "2.1 Create `src/data/mockData.js` with static arrays": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778009
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203936879
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203992405
+      }
+    ],
+    "2.2 Create `src/data/mockApi.js` with Promise stubs": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778091
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203996882
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204037463
+      }
+    ],
+    "3.1 Create `src/context/AppContext.js`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778167
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203937589
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203991573
+      }
+    ],
+    "4.1 Replace Vite starter shell with `EMS_Panel` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778243
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204042244
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204171151
+      }
+    ],
+    "5.1 Create `src/components/Sidebar.jsx`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778332
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204194151
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204284996
+      }
+    ],
+    "5.2 Create `src/components/Sidebar.css`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778413
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204194756
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204285699
+      }
+    ],
+    "6.1 Create `src/components/PanelHost.jsx`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778493
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204195417
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204286492
+      }
+    ],
+    "7. Checkpoint — Ensure context wiring and guard logic tests pass": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778577
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204731795
+      }
+    ],
+    "8.1 Create `src/components/LoginPanel.jsx`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778649
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204293101
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204720831
+      }
+    ],
+    "8.2 Create `src/components/LoginPanel.css`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778724
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204293689
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204721543
+      }
+    ],
+    "9.1 Create `src/components/CompanyListPanel.jsx`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778891
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204294506
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204722190
+      }
+    ],
+    "9.2 Create `src/components/CompanyListPanel.css`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203778975
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204295300
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204722713
+      }
+    ],
+    "10.1 Create `src/components/CompanyContactListPanel.jsx`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779059
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204296024
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204723604
+      }
+    ],
+    "10.2 Create `src/components/CompanyContactListPanel.css`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779139
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204301384
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204724345
+      }
+    ],
+    "11. Checkpoint — Ensure all component tests pass": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779220
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204732500
+      }
+    ],
+    "12.1 Update `src/index.css` for two-column flex layout": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779294
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204734832
+      }
+    ],
+    "12.2 Empty `src/App.css`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779397
+      },
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204734649
+      }
+    ],
+    "15. Final checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203779483
+      }
+    ],
+    "1. Set up test tooling": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203931200
+      }
+    ],
+    "3. Create `AppContext`": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787203991694
+      }
+    ],
+    "2. Create mock data layer": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204037605
+      }
+    ],
+    "4. Implement `EMS_Panel` root (`App.jsx`)": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204171367
+      }
+    ],
+    "5. Implement `Sidebar` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204285850
+      }
+    ],
+    "6. Implement `PanelHost` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204286574
+      }
+    ],
+    "8. Implement `LoginPanel` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204721770
+      }
+    ],
+    "9. Implement `CompanyListPanel` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204722933
+      }
+    ],
+    "10. Implement `CompanyContactListPanel` component": [
+      {
+        "executionId": "7b2525b9-851d-4458-bf34-bed22c5ea29f",
+        "chatSessionId": "sess_a8a3fd34-f141-4fa8-83f9-4f619bfca547",
+        "timestamp": 1787204724577
+      }
+    ]
+  }
+}

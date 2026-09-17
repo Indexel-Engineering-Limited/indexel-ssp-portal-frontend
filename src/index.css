@@ -1,0 +1,117 @@
+﻿@import "tailwindcss";
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    overscroll-behavior: none;
+    background-color: #f0f4fa;
+    color: #111827;
+    font-family: "Inter", "Hanken Grotesk", sans-serif;
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c8d6ea; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a0b8d4; }
+  aside { transition: width 0.3s ease-in-out; }
+  main  { transition: padding-left 0.3s ease-in-out; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@theme {
+  /* ── Brand palette ───────────────────────────────────────────
+     Primary  : Slate Blue   #2d55a0  (matches LoginPage CTA)
+     Surface  : Warm White   #ffffff / #f8fafd (off-white, not stark)
+     Background: Cool Mist   #f0f4fa
+     Text     : Deep Navy    #111827 / Muted #374151
+  ─────────────────────────────────────────────────────────────── */
+
+  /* Primary brand */
+  --color-primary:            #2d55a0;
+  --color-primary-hover:      #234690;
+  --color-primary-light:      #eef2fb;
+  --color-primary-container:  #dbe5f8;
+  --color-on-primary:         #ffffff;
+  --color-on-primary-container: #1e3a8a;
+  --color-primary-fixed:      #c5d3f4;
+  --color-primary-fixed-dim:  #a6bcee;
+  --color-inverse-primary:    #a6bcee;
+
+  /* Secondary accent — a softer indigo-teal */
+  --color-secondary:          #3a6fd8;
+  --color-secondary-container: #d6e4ff;
+  --color-on-secondary:       #ffffff;
+  --color-on-secondary-container: #1e3a78;
+  --color-secondary-fixed:    #b8cffa;
+  --color-secondary-fixed-dim: #8aaef5;
+
+  /* Surfaces */
+  --color-background:               #f0f4fa;
+  --color-surface:                  #f8fafd;
+  --color-surface-bright:           #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low:    #f3f6fb;
+  --color-surface-container:        #e8edf6;
+  --color-surface-container-high:   #dde4ef;
+  --color-surface-container-highest:#d2daea;
+  --color-surface-variant:          #dde4ef;
+  --color-surface-dim:              #c8d4e4;
+  --color-surface-tint:             #2d55a0;
+
+  /* Text / On-surface */
+  --color-on-background:      #111827;
+  --color-on-surface:         #111827;
+  --color-on-surface-variant: #374151;
+  --color-inverse-surface:    #1a2a45;
+  --color-inverse-on-surface: #eef2fb;
+
+  /* Outline / dividers */
+  --color-outline:         #6b7280;
+  --color-outline-variant: #c5d3e4;
+
+  /* Error */
+  --color-error:             #ba1a1a;
+  --color-error-container:   #ffdad6;
+  --color-on-error:          #ffffff;
+  --color-on-error-container:#93000a;
+
+  /* Tertiary (accent highlights) */
+  --color-tertiary:           #111827;
+  --color-tertiary-container: #1e3a8a;
+  --color-on-tertiary:        #ffffff;
+  --color-on-tertiary-container: #a6bcee;
+
+  /* ── Radii ── */
+  --radius-DEFAULT: 0.375rem;
+  --radius-lg:      0.625rem;
+  --radius-xl:      0.875rem;
+  --radius-full:    9999px;
+
+  /* ── Spacing ── */
+  --spacing-sidebar-width: 220px;
+  --spacing-gutter:        24px;
+  --spacing-stack-sm:      8px;
+  --spacing-stack-md:      16px;
+  --spacing-stack-lg:      24px;
+  --spacing-margin-page:   32px;
+
+  /* ── Typography ── */
+  --font-body-lg:            "Inter", "Hanken Grotesk", sans-serif;
+  --font-body-md:            "Inter", "Hanken Grotesk", sans-serif;
+  --font-headline-lg:        "Inter", "Hanken Grotesk", sans-serif;
+}
