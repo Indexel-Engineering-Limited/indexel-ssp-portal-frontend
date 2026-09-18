@@ -35,7 +35,7 @@ async function uploadImage(employeeId, imageFile) {
 const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    return `${import.meta.env.VITE_API_URL ?? "http://localhost:3000"}${path}`;
+    return `${import.meta.env.VITE_API_URL ?? "https://ssp-indexel-co-in-564576.hostingersite.com"}${path}`;
 };
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
