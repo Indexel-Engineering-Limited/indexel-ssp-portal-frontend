@@ -136,6 +136,14 @@ export async function deleteContact(contactId) {
   return res.data?.data ?? res.data;
 }
 
+export async function restoreContact(contactId) {
+  const res = await api.put(
+    `/api/companies/contact/restore/${contactId}`
+  );
+
+  return res.data?.data ?? res.data;
+}
+
 export async function deleteEmail(emailID) {
   const res = await api.delete(
     `/api/companies/email/${emailID}`
