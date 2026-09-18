@@ -969,7 +969,7 @@ const EmployeeCardView = () => {
         </div>
 
         {/* ══════════════════════════════
-            RIGHT — Photo + QR Code
+            RIGHT — Photo + QR Co
         ══════════════════════════════ */}
 
         <div className="p-8 flex flex-col items-center justify-start gap-8">
