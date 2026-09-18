@@ -11,7 +11,7 @@ import axios from "axios";
 
 // Public axios instance — no Authorization header, no 401 redirect
 const publicApi = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000",
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://ssp-indexel-co-in-564576.hostingersite.com",
     timeout: 15000,
 });
 

@@ -13,7 +13,7 @@ import logo from "../../assets/login-logo.png";
 const getImageUrl = (path) => {
   if (!path) return null;
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base = import.meta?.env?.VITE_API_URL ?? "http://localhost:3000";
+  const base = import.meta?.env?.VITE_API_URL ?? "https://ssp-indexel-co-in-564576.hostingersite.com/api/images";
   return `${base}${path}`;
 };
 

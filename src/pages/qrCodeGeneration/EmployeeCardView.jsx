@@ -25,7 +25,7 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL = import.meta.env.VITE_API_URL || "https://ssp-indexel-co-in-564576.hostingersite.com/api/images";
   return `${baseURL}${imagePath}`;
 };
 

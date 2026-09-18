@@ -55,13 +55,13 @@ export default function EditEmployeeModal({
 
     if (employee.employee_image) {
       const baseURL =
-        import.meta.env.VITE_API_URL || "http://localhost:3000";
+        import.meta.env.VITE_API_URL || "https://ssp-indexel-co-in-564576.hostingersite.com";
 
       const imageUrl =
         employee.employee_image.startsWith("http://") ||
         employee.employee_image.startsWith("https://")
           ? employee.employee_image
-          : `${baseURL}${employee.employee_image}`;
+          : `${baseURL}/api/images${employee.employee_image}`;
 
       setImagePreview(imageUrl);
     } else {
