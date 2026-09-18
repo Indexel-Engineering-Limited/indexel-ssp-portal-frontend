@@ -1,4 +1,4 @@
-﻿
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -47,7 +47,6 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-<<<<<<< HEAD
   const baseURL =
     import.meta.env.VITE_API_URL ||
     "https://ssp-indexel-co-in-564576.hostingersite.com";
@@ -67,9 +66,6 @@ const getImageUrl = (imagePath) => {
     return `${baseURL}/${imagePath}`;
   }
 
-=======
-  const baseURL = import.meta.env.VITE_API_URL || "https://ssp-indexel-co-in-564576.hostingersite.com";
->>>>>>> 8d225f096d348844ff0b9cc6d838c5c665b78ceb
   return `${baseURL}${imagePath}`;
 };
 
@@ -969,7 +965,7 @@ const EmployeeCardView = () => {
         </div>
 
         {/* ══════════════════════════════
-            RIGHT — Photo + QR Co
+            RIGHT — Photo + QR Code
         ══════════════════════════════ */}
 
         <div className="p-8 flex flex-col items-center justify-start gap-8">
