@@ -1085,7 +1085,4 @@ const EmployeeCardView = () => {
 };
 
 export default EmployeeCardView;
-<<<<<<< HEAD
 
-=======
->>>>>>> 8d225f096d348844ff0b9cc6d838c5c665b78ceb
