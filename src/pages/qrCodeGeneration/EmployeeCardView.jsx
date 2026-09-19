@@ -47,7 +47,6 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
 
-<<<<<<< HEAD
   const baseURL =
     import.meta.env.VITE_API_URL ||
     "https://ssp-indexel-co-in-564576.hostingersite.com";
@@ -67,9 +66,6 @@ const getImageUrl = (imagePath) => {
     return `${baseURL}/${imagePath}`;
   }
 
-=======
-  const baseURL = import.meta.env.VITE_API_URL || "https://ssp-indexel-co-in-564576.hostingersite.com";
->>>>>>> 8d225f096d348844ff0b9cc6d838c5c665b78ceb
   return `${baseURL}${imagePath}`;
 };
 
@@ -1085,7 +1081,4 @@ const EmployeeCardView = () => {
 };
 
 export default EmployeeCardView;
-<<<<<<< HEAD
 
-=======
->>>>>>> 8d225f096d348844ff0b9cc6d838c5c665b78ceb
