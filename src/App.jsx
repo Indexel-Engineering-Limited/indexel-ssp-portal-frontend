@@ -21,6 +21,7 @@ import EmployeeCardView from "./pages/qrCodeGeneration/EmployeeCardView";
 import PublicEmployeeView from "./pages/qrCodeGeneration/PublicEmployeeView";
 import CompanySignature from "./pages/CompanySignature";
 import EmployeeImageUpload from "./pages/EmployeeImageUpload";
+import OBSheetTable from "./pages/OBSheetPanel/OBSheetTable";
 
 function RequireAuth() {
   const location = useLocation();
@@ -91,6 +92,9 @@ export default function App() {
             
             <Route element={<RequirePermission moduleKey="bulk_upload" />}>
               <Route path="/bulk-upload" element={<BulkUploadPage />} />
+            </Route>
+            <Route element={<RequirePermission moduleKey="bulk_upload" />}>
+              <Route path="/ob-sheet" element={<OBSheetTable />} />
             </Route>
             
             {/* Admin-only routes */}

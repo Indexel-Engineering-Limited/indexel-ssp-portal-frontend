@@ -443,15 +443,7 @@ const EmployeeCardView = () => {
             ],
           }),
 
-          new TableRow({
-            children: [
-              createDocCell("Location"),
-              createDocCell(
-                employee.location ||
-                  employee.address
-              ),
-            ],
-          }),
+          
 
           new TableRow({
             children: [
@@ -470,23 +462,8 @@ const EmployeeCardView = () => {
             ],
           }),
 
-          new TableRow({
-            children: [
-              createDocCell("Status"),
-              createDocCell(
-                employee.status || "Active"
-              ),
-            ],
-          }),
 
-          new TableRow({
-            children: [
-              createDocCell("Joining Date"),
-              createDocCell(
-                formattedJoiningDate
-              ),
-            ],
-          }),
+          
         ],
       });
 
