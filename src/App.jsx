@@ -70,7 +70,7 @@ export default function App() {
         {/* Public Employee Verification (QR Code Scan Destination) */}
         <Route path="/employee" element={<PublicEmployeeView />} />
         <Route path="/employee/:employeeId" element={<PublicEmployeeView />} />
-         <Route path="/image-upload" element={<EmployeeImageUpload />} />
+         {/* <Route path="/image-upload" element={<EmployeeImageUpload />} /> */}
 
         {/* Protected Routes */}
         <Route element={<RequireAuth />}>

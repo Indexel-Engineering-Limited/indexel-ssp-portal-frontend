@@ -17,6 +17,7 @@ const getImageUrl = (path) => {
   return `${base}${path}`;
 };
 ngfhnfghf
+
 // ── Sub-components ────────────────────────────────────────────────────────
 
 function AppHeader() {
