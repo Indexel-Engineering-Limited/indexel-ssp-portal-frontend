@@ -16,7 +16,7 @@ const getImageUrl = (path) => {
   const base = import.meta?.env?.VITE_API_URL ?? "https://ssp-indexel-co-in-564576.hostingersite.com/";
   return `${base}${path}`;
 };
-
+ngfhnfghf
 // ── Sub-components ────────────────────────────────────────────────────────
 
 function AppHeader() {
