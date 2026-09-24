@@ -760,11 +760,11 @@ export default function UserLogsPage() {
                           {log.name || "—"}
                         </div>
 
-                        {log.user_id && (
+                        {/* {log.user_id && (
                           <div className="text-[11px] text-[#6b7280]">
                             User #{log.user_id}
                           </div>
-                        )}
+                        )} */}
                       </td>
 
                       {/* Action Badge */}

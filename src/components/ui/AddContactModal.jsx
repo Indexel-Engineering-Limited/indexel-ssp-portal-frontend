@@ -21,6 +21,16 @@ const DEPARTMENTS = [
   "Process Planning",
   "Management",
 ];
+const COUNTRY_CODES = [
+  { code: "+91", country: "India" },
+  { code: "+1", country: "USA / Canada" },
+  { code: "+44", country: "UK" },
+  { code: "+61", country: "Australia" },
+  { code: "+971", country: "UAE" },
+  { code: "+65", country: "Singapore" },
+  { code: "+49", country: "Germany" },
+  { code: "+33", country: "France" },
+];
 
 function Field({ label, required, children }) {
   return (
@@ -57,7 +67,7 @@ export default function AddContactModal({
   // ─────────────────────────────────────────────────────────────
   // FORM STATE
   // ─────────────────────────────────────────────────────────────
-
+  const [countryCode, setCountryCode] = useState("+91");
   const [form, setForm] = useState(() => ({
     person_name: initialContact?.person_name || "",
     designation: initialContact?.designation || "",
@@ -69,6 +79,7 @@ export default function AddContactModal({
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
 
   // ─────────────────────────────────────────────────────────────
   // UPDATE FORM WHEN INITIAL CONTACT CHANGES
@@ -125,21 +136,16 @@ export default function AddContactModal({
       e.person_name = "Person name is required";
     }
 
-    if (
-      form.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        form.email.trim()
-      )
-    ) {
-      e.email = "Enter a valid email";
+    if (!form.department.trim()) {
+      e.department = "Department is required";
     }
 
-    if (
-      !form.email.trim() &&
-      !form.contact_number.trim()
+    if (!form.email.trim()) {
+      e.email = "Email address is required";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
     ) {
-      e.contact =
-        "Enter an email address or contact number";
+      e.email = "Enter a valid email";
     }
 
     return e;
@@ -168,8 +174,9 @@ export default function AddContactModal({
         designation: form.designation.trim(),
         department: form.department,
         email: form.email.trim(),
-        contact_number:
-          form.contact_number.trim(),
+        contact_number: form.contact_number.trim()
+          ? `${countryCode} ${form.contact_number.trim()}`
+          : "",
       });
 
       // Parent handles closing in edit mode.
@@ -178,9 +185,8 @@ export default function AddContactModal({
     } catch (err) {
       setSubmitError(
         err?.message ||
-          `Failed to ${
-            isEditMode ? "update" : "add"
-          } contact`
+        `Failed to ${isEditMode ? "update" : "add"
+        } contact`
       );
     } finally {
       setSubmitting(false);
@@ -297,7 +303,7 @@ export default function AddContactModal({
 
             {/* Department */}
 
-            <Field label="Department">
+            <Field label="Department" required>
               <select
                 className={inputCls}
                 value={form.department}
@@ -324,35 +330,84 @@ export default function AddContactModal({
                   )
                 )}
               </select>
-            </Field>
-
-            {/* Contact Number */}
-
-            <Field label="Contact Number">
-              <input
-                className={inputCls}
-                placeholder="e.g. +44 123456789"
-                value={form.contact_number}
-                disabled={isSubmitting}
-                onChange={(e) =>
-                  set(
-                    "contact_number",
-                    e.target.value
-                  )
-                }
-              />
-
-              {errors.contact && (
+              {errors.department && (
                 <span className="text-[#ba1a1a] text-[11px]">
-                  {errors.contact}
+                  {errors.department}
                 </span>
               )}
             </Field>
 
-            {/* Email */}
+            {/* Contact Number */}
 
             <div className="col-span-2">
-              <Field label="Email">
+              <Field label="Contact Number">
+                <div className="flex w-full gap-2">
+
+                  {/* Country Code */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                      className={`${inputCls} !w-[90px] !px-2 flex items-center justify-between`}
+                    >
+                      <span>{countryCode}</span>
+
+                      <span className="material-symbols-outlined text-[16px]">
+                        expand_more
+                      </span>
+                    </button>
+
+                    {showCountryDropdown && (
+                      <div className="absolute left-0 top-full mt-1 z-50 w-[180px] max-h-60 overflow-y-auto rounded-lg border border-[#c5d3e4] bg-white shadow-lg">
+                        {COUNTRY_CODES.map((item) => (
+                          <button
+                            key={item.code}
+                            type="button"
+                            onClick={() => {
+                              setCountryCode(item.code);
+                              setShowCountryDropdown(false);
+                            }}
+                            className="w-full px-3 py-2 text-left text-[13px] hover:bg-[#eef2fb] flex gap-2"
+                          >
+                            <span className="font-medium w-[20px]">
+                              {item.code}
+                            </span>
+
+                            <span className="text-[#374151]">
+                              {" - "+item.country}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mobile Number */}
+                  <input
+                    className={`${inputCls} !w-auto flex-1 min-w-0`}
+                    type="tel"
+                    placeholder="Enter mobile number"
+                    value={form.contact_number}
+                    disabled={isSubmitting}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      set("contact_number", value);
+                    }}
+                  />
+                </div>
+
+                {errors.contact && (
+                  <span className="text-[#ba1a1a] text-[11px]">
+                    {errors.contact}
+                  </span>
+                )}
+              </Field>
+            </div>
+
+
+            <div className="col-span-2">
+              <Field label="Email" required>
                 <input
                   className={inputCls}
                   type="email"
@@ -416,8 +471,8 @@ export default function AddContactModal({
                   ? "Updating..."
                   : "Saving..."
                 : isEditMode
-                ? "Update Contact"
-                : "Add Contact"}
+                  ? "Update Contact"
+                  : "Add Contact"}
             </button>
           </div>
         </form>

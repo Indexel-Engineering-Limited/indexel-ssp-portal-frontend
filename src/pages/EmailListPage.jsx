@@ -2,7 +2,7 @@
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import TablePagination from "../components/company/TablePagination";
-import { createEmailsBulk, getEmailList, deleteEmail } from "../services/companyService";
+import { createEmailsBulk, getEmailList, deleteEmail, updateEmailType } from "../services/companyService";
 import { downloadEmailSampleExcel, parseEmailsExcel } from "../utils/contactExcel";
 import { canWriteModule } from "../services/authService";
 
@@ -19,6 +19,9 @@ export default function EmailListPage() {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [uploading, setUploading] = useState(false);
   const emailInputRef = useRef(null);
+  const [editingId, setEditingId]     = useState(null);   // id of row being edited
+  const [editingType, setEditingType] = useState("");      // draft type value
+  const [saving, setSaving]           = useState(false);  // save in-progress
 
   async function loadEmails() {
     setLoading(true);
@@ -47,7 +50,33 @@ export default function EmailListPage() {
         if (!cancelled) setLoading(false);
       });
 
-    return () => {
+    function startEdit(entry) {
+    setEditingId(entry.id);
+    setEditingType(entry.type || "principal");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingType("");
+  }
+
+  async function handleSaveType(id) {
+    setSaving(true);
+    try {
+      await updateEmailType(id, editingType);
+      setEmails((prev) =>
+        prev.map((e) => e.id === id ? { ...e, type: editingType } : e)
+      );
+      setEditingId(null);
+      setEditingType("");
+    } catch (err) {
+      setError(err.message || "Failed to update type");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return () => {
       cancelled = true;
     };
   }, []);
@@ -140,6 +169,32 @@ export default function EmailListPage() {
     }
   }
 
+  function startEdit(entry) {
+    setEditingId(entry.id);
+    setEditingType(entry.type || "principal");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingType("");
+  }
+
+  async function handleSaveType(id) {
+    setSaving(true);
+    try {
+      await updateEmailType(id, editingType);
+      setEmails((prev) =>
+        prev.map((e) => e.id === id ? { ...e, type: editingType } : e)
+      );
+      setEditingId(null);
+      setEditingType("");
+    } catch (err) {
+      setError(err.message || "Failed to update type");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 gap-4">
@@ -220,28 +275,94 @@ export default function EmailListPage() {
                         {entry.email || "—"}
                       </td>
 
-                      {/* Type */}
-                      <td className="px-4 py-3 text-[#374151] capitalize">
-                        {entry.type || "—"}
+                      {/* Type — inline editable */}
+                      <td className="px-4 py-3">
+                        {editingId === entry.id ? (
+                          <select
+                            value={editingType}
+                            onChange={(e) => setEditingType(e.target.value)}
+                            autoFocus
+                            className="rounded-lg border border-[#2d55a0]/40 bg-white px-2 py-1.5 text-[12.5px] text-[#111827] outline-none focus:ring-2 focus:ring-[#2d55a0]/20"
+                          >
+                            <option value="principal">Principal</option>
+                            <option value="customer">Customer</option>
+                            <option value="vendor">Vendor</option>
+                          </select>
+                        ) : (
+                          <span
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11.5px] font-medium capitalize"
+                            style={{
+                              background:
+                                entry.type === "vendor"   ? "#fef9c3" :
+                                entry.type === "customer" ? "#dbe5f8" :
+                                "#f0f4fa",
+                              color:
+                                entry.type === "vendor"   ? "#854d0e" :
+                                entry.type === "customer" ? "#1e3a8a" :
+                                "#374151",
+                            }}
+                          >
+                            {entry.type || "—"}
+                          </span>
+                        )}
                       </td>
 
                       {/* Created At */}
                       <td className="px-4 py-3 text-[#374151]">
                         {formatDate(entry.created_at)}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        {canEdit && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteEmail(entry.id)}
-                            title="Delete email"
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#ba1a1a] hover:bg-[#ffdad6]/50 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[19px]">
-                              delete
-                            </span>
-                          </button>
-                        )}
+
+                      {/* Actions */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1">
+                          {editingId === entry.id ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveType(entry.id)}
+                                disabled={saving}
+                                title="Save"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#2d55a0] text-white hover:bg-[#234690] transition-colors disabled:opacity-50"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">
+                                  {saving ? "progress_activity" : "check"}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEdit}
+                                disabled={saving}
+                                title="Cancel"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[#c5d3e4] text-[#374151] hover:bg-[#f0f4fa] transition-colors disabled:opacity-50"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">close</span>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {canEdit && (
+                                <button
+                                  type="button"
+                                  onClick={() => startEdit(entry)}
+                                  title="Edit type"
+                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#374151] hover:bg-[#eef2fb] hover:text-[#2d55a0] transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[17px]">edit</span>
+                                </button>
+                              )}
+                              {canEdit && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteEmail(entry.id)}
+                                  title="Delete email"
+                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#ba1a1a] hover:bg-[#ffdad6]/50 transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[19px]">delete</span>
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

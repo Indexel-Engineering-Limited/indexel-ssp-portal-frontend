@@ -144,6 +144,15 @@ export async function restoreContact(contactId) {
   return res.data?.data ?? res.data;
 }
 
+/**
+ * PUT /api/emails/:id/type
+ * Updates the type of an email address.
+ */
+export async function updateEmailType(id, type) {
+  const res = await api.put(`/api/companies/emails/${id}/type`, { type });
+  return res.data?.data ?? res.data;
+}
+
 export async function deleteEmail(emailID) {
   const res = await api.delete(
     `/api/companies/email/${emailID}`
