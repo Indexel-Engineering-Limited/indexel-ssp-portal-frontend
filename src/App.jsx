@@ -22,6 +22,12 @@ import PublicEmployeeView from "./pages/qrCodeGeneration/PublicEmployeeView";
 import CompanySignature from "./pages/CompanySignature";
 import EmployeeImageUpload from "./pages/EmployeeImageUpload";
 import OBSheetTable from "./pages/OBSheetPanel/OBSheetTable";
+import IncentiveDashboard    from "./pages/OBSheetPanel/incentives/IncentiveDashboard";
+import IncentiveSchemes      from "./pages/OBSheetPanel/incentives/IncentiveSchemes";
+import SchemeDetails         from "./pages/OBSheetPanel/incentives/SchemeDetails";
+import IncentiveOrders       from "./pages/OBSheetPanel/incentives/IncentiveOrders";
+import OrderForm             from "./pages/OBSheetPanel/incentives/OrderForm";
+import IncentiveCalculations from "./pages/OBSheetPanel/incentives/IncentiveCalculations";
 
 function RequireAuth() {
   const location = useLocation();
@@ -96,6 +102,15 @@ export default function App() {
             <Route element={<RequirePermission moduleKey="bulk_upload" />}>
               <Route path="/ob-sheet" element={<OBSheetTable />} />
             </Route>
+
+            {/* Sales Incentive Management */}
+            <Route path="/ob-sheet/incentives"                         element={<IncentiveDashboard />} />
+            <Route path="/ob-sheet/incentives/schemes"                 element={<IncentiveSchemes />} />
+            <Route path="/ob-sheet/incentives/schemes/:schemeId"       element={<SchemeDetails />} />
+            <Route path="/ob-sheet/incentives/orders"                  element={<IncentiveOrders />} />
+            <Route path="/ob-sheet/incentives/orders/new"              element={<OrderForm />} />
+            <Route path="/ob-sheet/incentives/orders/:id/edit"         element={<OrderForm />} />
+            <Route path="/ob-sheet/incentives/calculations"            element={<IncentiveCalculations />} />
             
             {/* Admin-only routes */}
             <Route element={<RequireAdmin />}>

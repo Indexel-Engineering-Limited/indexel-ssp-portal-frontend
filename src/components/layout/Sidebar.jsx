@@ -49,6 +49,24 @@ const ROUTE_MAP = {
     to: "/hr-management",
     end: true,
   },
+
+  // Sales Incentive
+  incentive_dashboard: {
+    to: "/ob-sheet/incentives",
+    end: true,
+  },
+  incentive_schemes: {
+    to: "/ob-sheet/incentives/schemes",
+    end: false,
+  },
+  incentive_orders: {
+    to: "/ob-sheet/incentives/orders",
+    end: false,
+  },
+  incentive_calculations: {
+    to: "/ob-sheet/incentives/calculations",
+    end: false,
+  },
 };
 
 // Always-visible account items
@@ -307,7 +325,9 @@ export default function Sidebar({ open, onClose }) {
                         ? "database"
                         : sectionName === "hr"
                           ? "badge"
-                          : "folder"}
+                          : sectionName === "sales"
+                            ? "trending_up"
+                            : "folder"}
                     </span>
 
                     <span
