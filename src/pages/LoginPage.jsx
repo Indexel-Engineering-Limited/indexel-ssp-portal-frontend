@@ -44,6 +44,7 @@ export default function LoginPage() {
         user_access: "/user-access",
         user_logs: "/user-logs",
         users: "/users",
+        employee_list:"/hr-management"
       };
 
       // Find the first module for which the user has read access
