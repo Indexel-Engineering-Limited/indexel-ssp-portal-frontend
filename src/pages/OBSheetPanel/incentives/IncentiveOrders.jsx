@@ -7,10 +7,10 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 function StatusBadge({ status }) {
   const styles = {
-    draft:     "bg-[#fef9c3] text-[#854d0e]",
+    draft: "bg-[#fef9c3] text-[#854d0e]",
     submitted: "bg-[#dbe5f8] text-[#1e3a8a]",
-    approved:  "bg-[#dcfce7] text-[#166534]",
-    rejected:  "bg-[#ffdad6] text-[#ba1a1a]",
+    approved: "bg-[#dcfce7] text-[#166534]",
+    rejected: "bg-[#ffdad6] text-[#ba1a1a]",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11.5px] font-medium capitalize ${styles[status] ?? "bg-[#f3f4f6] text-[#6b7280]"}`}>
@@ -136,38 +136,118 @@ export default function IncentiveOrders() {
         </div>
       </div>
 
-      {/* Target banner */}
-      {target && (
-        <div className="mb-4 rounded-xl border border-[#c5d3e4]/40 bg-white shadow-sm overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#eef2fb] flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[#2d55a0] text-[20px]">flag</span>
+      {/* Target progress banner */}
+      {target && (() => {
+        const targetAmt = Number(target.target_amount) || 0;
+        const achieved = orders.reduce((sum, o) => {
+          const v = o.po_value_after_sharing != null && o.po_value_after_sharing !== ""
+            ? Number(o.po_value_after_sharing)
+            : Number(o.po_value) || 0;
+          return sum + v;
+        }, 0);
+        const achPct = targetAmt > 0 ? (achieved / targetAmt) * 100 : 0;
+        const capped = Math.min(achPct, 100);
+        const netEarned = orders.reduce((sum, o) => sum + (Number(o.net_incentive) || 0), 0);
+        const remaining = Math.max(0, targetAmt * 0.7 - achieved);
+        const isEligible = achPct >= 70;
+        const barColor = achPct >= 100 ? "#16a34a" : achPct >= 70 ? "#2d55a0" : achPct >= 50 ? "#d97706" : "#ba1a1a";
+
+        return (
+          <div className="mb-5 rounded-xl border border-[#e2e9f4] bg-white shadow-sm overflow-hidden">
+
+            {/* Coloured top strip */}
+            <div className="h-1.5 w-full" style={{ background: barColor }} />
+
+            <div className="px-5 pt-4 pb-5 space-y-4">
+
+              {/* Title row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#2d55a0] text-[18px]">flag</span>
+                  <span className="text-[13px] font-semibold text-[#111827]">
+                    My Target — FY {target.financial_year}
+                  </span>
+                </div>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${target.status === "active" ? "bg-[#dcfce7] text-[#166534]" :
+                    target.status === "achieved" ? "bg-[#dbe5f8] text-[#1e3a8a]" :
+                      "bg-[#f3f4f6] text-[#6b7280]"
+                  }`}>{target.status ?? "—"}</span>
               </div>
+
+              {/* Stats grid — always show all 4 */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Target */}
+                <div className="rounded-lg bg-[#f8fafd] border border-[#e2e9f4] px-3 py-2.5">
+                  <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#6b7280] mb-0.5">Target</p>
+                  <p className="text-[15px] font-bold text-[#111827]">₹{targetAmt.toLocaleString("en-IN")}</p>
+                </div>
+                {/* Achieved */}
+                <div className="rounded-lg bg-[#f8fafd] border border-[#e2e9f4] px-3 py-2.5">
+                  <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#6b7280] mb-0.5">Achieved</p>
+                  <p className="text-[15px] font-bold text-[#111827]">₹{achieved.toLocaleString("en-IN")}</p>
+                </div>
+                {/* Achievement % */}
+                <div className="rounded-lg px-3 py-2.5 border" style={{
+                  background: isEligible ? "#f0fdf4" : "#fffbeb",
+                  borderColor: isEligible ? "#bbf7d0" : "#fde68a",
+                }}>
+                  <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#6b7280] mb-0.5">Achievement</p>
+                  <p className="text-[15px] font-bold" style={{ color: barColor }}>{achPct.toFixed(1)}%</p>
+                </div>
+                {/* Net Incentive — always visible */}
+                <div className="rounded-lg px-3 py-2.5 border" style={{
+                  background: netEarned > 0 ? "#f0fdf4" : "#f8fafd",
+                  borderColor: netEarned > 0 ? "#bbf7d0" : "#e2e9f4",
+                }}>
+                  <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#6b7280] mb-0.5">Net Incentive</p>
+                  <p className="text-[15px] font-bold" style={{ color: netEarned > 0 ? "#166534" : "#9ca3af" }}>
+                    ₹{netEarned.toLocaleString("en-IN")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">My Target — FY {target.financial_year}</p>
-                <p className="text-[22px] font-bold text-[#111827] leading-tight">
-                  ₹{Number(target.target_amount).toLocaleString("en-IN")}
-                </p>
+                <div className="w-full h-3 rounded-full bg-[#f0f4fa] overflow-visible relative">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${capped}%`, background: barColor }}
+                  />
+                  {/* 70% threshold marker */}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
+                    style={{ left: "70%", background: "#374151", opacity: 0.35 }}
+                  />
+                </div>
+                {/* Labels */}
+                <div className="relative mt-1.5 h-4">
+                  <span className="absolute text-[10px] text-[#6b7280] -translate-x-1/2" style={{ left: "0%" }}>0%</span>
+                  <span className="absolute text-[10px] font-semibold text-[#374151] -translate-x-1/2" style={{ left: "70%" }}>70%</span>
+                  <span className="absolute text-[10px] text-[#9ca3af] -translate-x-full" style={{ left: "100%" }}>100%</span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-6 px-1">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Scheme ID</p>
-                <p className="text-[15px] font-bold text-[#2d55a0]">{target.scheme_id}</p>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Status</p>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11.5px] font-medium capitalize ${
-                  target.status === "active"   ? "bg-[#dcfce7] text-[#166534]" :
-                  target.status === "achieved" ? "bg-[#dbe5f8] text-[#1e3a8a]" :
-                  "bg-[#f3f4f6] text-[#6b7280]"
-                }`}>{target.status ?? "—"}</span>
-              </div>
+
+              {/* Message */}
+              {isEligible ? (
+                <div className="flex items-center gap-2 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
+                  <span className="material-symbols-outlined text-[#166534] text-[16px]">check_circle</span>
+                  <span className="text-[12.5px] text-[#166534] font-medium">
+                    {achPct.toFixed(1)}% achieved — eligible for incentive. Net earned: ₹{netEarned.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 rounded-lg bg-[#fffbeb] border border-[#fde68a] px-3 py-2">
+                  <span className="material-symbols-outlined text-[#d97706] text-[16px]">info</span>
+                  <span className="text-[12.5px] text-[#92400e]">
+                    Need ₹{remaining.toLocaleString("en-IN")} more to reach 70% — minimum threshold for incentive payout.
+                  </span>
+                </div>
+              )}
+
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Error banner */}
       {error && (
@@ -193,13 +273,16 @@ export default function IncentiveOrders() {
                 <tr className="bg-[#f8fafd] text-[#374151] text-[11px] font-semibold uppercase tracking-wider border-b border-[#d4e0f0]/50">
                   <th className="py-2.5 px-4">Invoice No</th>
                   <th className="py-2.5 px-4">Invoice Date</th>
-                  
+
                   <th className="py-2.5 px-4">Plant / Customer</th>
+                  <th className="py-2.5 px-4">PO Number</th>
+                  <th className="py-2.5 px-4">PO Date</th>
                   <th className="py-2.5 px-4 text-right">PO Value</th>
+
                   <th className="py-2.5 px-4">PO Value Sharing</th>
                   <th className="py-2.5 px-4 text-right">Margin %</th>
                   <th className="py-2.5 px-4 text-right">Net Incentive</th>
-                  
+
                   <th className="py-2.5 px-4 text-center">Actions</th>
                 </tr>
               </thead>
@@ -215,19 +298,28 @@ export default function IncentiveOrders() {
                     <tr key={order.id} className="border-b border-[#d4e0f0]/40 last:border-0 hover:bg-[#f0f4fa]/45">
                       <td className="px-4 py-3 font-medium">{order.invoice_no ?? "—"}</td>
                       <td className="px-4 py-3 text-[#374151]">{formatDate(order.invoice_date)}</td>
-                      
+
                       <td className="px-4 py-3 text-[#374151]">{order.plant_customer ?? "—"}</td>
+                      <td className="px-4 py-3 text-[#374151]">{order.po_number ?? "-"}</td>
+                      <td className="px-4 py-3 text-[#374151]">
+                        {order.po_date
+                          ? new Date(order.po_date).toLocaleDateString("en-GB", {
+                            timeZone: "UTC",
+                          })
+                          : "-"}
+                      </td>
                       <td className="px-4 py-3 text-right text-[#374151]">
                         {order.po_value != null ? `₹${Number(order.po_value).toLocaleString("en-IN")}` : "—"}
                       </td>
                       <td className="px-4 py-3 text-[#374151]">{order.po_value_after_sharing ?? "-"}</td>
+
                       <td className="px-4 py-3 text-right text-[#374151]">
                         {order.margin_percent != null ? `${order.margin_percent}%` : "—"}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-[#2d55a0]">
                         {order.net_incentive != null ? `₹${Number(order.net_incentive).toLocaleString("en-IN")}` : "—"}
                       </td>
-                     
+
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button

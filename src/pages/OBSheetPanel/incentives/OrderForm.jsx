@@ -1,22 +1,20 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getOrder, createOrder, updateOrder, getEmployeeTarget } from "../../../services/incentiveService";
+import { getOrder, createOrder, updateOrder, getEmployeeTarget, getMarginRules, getAchievementRules } from "../../../services/incentiveService";
 import { getCurrentUser } from "../../../services/authService";
 
-// ─── Shared input class helper — defined OUTSIDE so it never remounts ─────
+// ─── Outside component — stable reference, no remount on re-render ────────
 function inpCls(name, fieldErrors) {
   return `w-full rounded-lg border px-3 py-2 text-[13px] text-[#111827] outline-none focus:border-[#2d55a0] focus:ring-2 focus:ring-[#2d55a0]/10 bg-[#f8fafd] transition-all ${
     fieldErrors[name] ? "border-[#ba1a1a]" : "border-[#c5d3e4]/50"
   }`;
 }
 
-// ─── Field component — defined OUTSIDE so React keeps a stable reference ──
 function Field({ label, name, type, placeholder, required, form, fieldErrors, onChange, children }) {
   return (
     <div>
       <label className="block text-[12px] font-medium text-[#374151] mb-1">
-        {label}
-        {required && <span className="text-[#ba1a1a] ml-0.5">*</span>}
+        {label}{required && <span className="text-[#ba1a1a] ml-0.5">*</span>}
       </label>
       {children ?? (
         <input
@@ -28,14 +26,29 @@ function Field({ label, name, type, placeholder, required, form, fieldErrors, on
           className={inpCls(name, fieldErrors)}
         />
       )}
-      {fieldErrors[name] && (
-        <p className="text-[11.5px] text-[#ba1a1a] mt-0.5">{fieldErrors[name]}</p>
-      )}
+      {fieldErrors[name] && <p className="text-[11.5px] text-[#ba1a1a] mt-0.5">{fieldErrors[name]}</p>}
     </div>
   );
 }
 
-// ─── Initial form state ───────────────────────────────────────────────────
+// ─── Margin rule matcher ──────────────────────────────────────────────────
+// Finds the applicable margin rule for a given margin % value
+function findMarginRule(rules, marginPercent) {
+  if (!rules?.length || marginPercent === "" || marginPercent === null) return null;
+  const mp = Number(marginPercent);
+  if (isNaN(mp)) return null;
+
+  // Sort by sequence ascending to apply in order
+  const sorted = [...rules].sort((a, b) => Number(a.sequence) - Number(b.sequence));
+
+  return sorted.find((r) => {
+    const min = Number(r.min_margin);
+    const max = r.max_margin !== "" && r.max_margin != null ? Number(r.max_margin) : Infinity;
+    return mp >= min && mp < max;
+  }) ?? null;
+}
+
+// ─── Initial form ─────────────────────────────────────────────────────────
 const EMPTY_FORM = {
   invoice_no:             "",
   invoice_date:           "",
@@ -52,11 +65,9 @@ const EMPTY_FORM = {
 
 // ─── Main component ───────────────────────────────────────────────────────
 export default function OrderForm() {
-  const navigate  = useNavigate();
-  const { id }    = useParams();
-  const isEdit    = Boolean(id);
-
-  // Salesperson auto-filled from logged-in user
+  const navigate    = useNavigate();
+  const { id }      = useParams();
+  const isEdit      = Boolean(id);
   const currentUser = getCurrentUser();
   const salesperson = currentUser?.employee_id ?? currentUser?.id ?? "";
 
@@ -67,15 +78,31 @@ export default function OrderForm() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess]         = useState(false);
   const [target, setTarget]           = useState(null);
+  const [marginRules, setMarginRules]         = useState([]);
+  const [achievementRules, setAchievementRules] = useState([]);
 
-  // Fetch employee target on mount
+  // Fetch target + margin rules on mount
   useEffect(() => {
     const empId = currentUser?.employee_id ?? currentUser?.id;
     if (!empId) return;
+
     getEmployeeTarget(empId)
-      .then((data) => setTarget(data[0]))
+      .then((data) => {
+        const t = Array.isArray(data) ? data[0] : data;
+        setTarget(t);
+        // Once we have the scheme_id, fetch margin rules
+        const schemeId = t?.scheme_id;
+        if (schemeId) {
+          Promise.all([
+            getMarginRules(schemeId).catch(() => []),
+            getAchievementRules(schemeId).catch(() => []),
+          ]).then(([mRules, aRules]) => {
+            setMarginRules(Array.isArray(mRules) ? mRules : []);
+            setAchievementRules(Array.isArray(aRules) ? aRules : []);
+          });
+        }
+      })
       .catch(() => {});
-      
   }, []);
 
   // Load order for edit mode
@@ -111,16 +138,41 @@ export default function OrderForm() {
     setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   }
 
+  // ─── Live incentive calculation ─────────────────────────────────────────
+  const incentiveCalc = useMemo(() => {
+    const poSharing = form.po_value_after_sharing !== ""
+      ? Number(form.po_value_after_sharing)
+      : Number(form.po_value);
+    const marginPct  = Number(form.margin_percent);
+
+    if (!poSharing || isNaN(poSharing) || !marginRules.length) return null;
+
+    const rule = findMarginRule(marginRules, form.margin_percent);
+    if (!rule) return null;
+
+    const multiplier     = Number(rule.multiplier);
+    // multiplier is a percentage value (e.g. 0.6 = 0.6%), so divide by 100
+    const expectedAmount = poSharing * (multiplier / 100);
+
+    return {
+      rule,
+      multiplier,
+      poSharing,
+      marginPct,
+      expectedAmount,
+    };
+  }, [form.po_value, form.po_value_after_sharing, form.margin_percent, marginRules]);
+
   function validate() {
     const errs = {};
-    if (!form.plant_customer.trim())                                errs.plant_customer = "Required";
-    if (!form.po_number.trim())                                      errs.po_number       = "Required";
-    if (!form.po_date)                                               errs.po_date         = "Required";
-    if (!form.new_product_customer)                                  errs.new_product_customer = "Required";
-    if (form.po_value === "" || form.po_value === null)             errs.po_value       = "Required";
-    if (form.margin_percent === "" || form.margin_percent === null) errs.margin_percent = "Required";
+    if (!form.plant_customer.trim())                                errs.plant_customer       = "Required";
+    if (!form.po_number.trim())                                     errs.po_number            = "Required";
+    if (!form.po_date)                                              errs.po_date              = "Required";
+    if (!form.new_product_customer)                                 errs.new_product_customer = "Required";
+    if (form.po_value === "" || form.po_value === null)             errs.po_value             = "Required";
+    if (form.margin_percent === "" || form.margin_percent === null) errs.margin_percent       = "Required";
     const mp = Number(form.margin_percent);
-    if (!isNaN(mp) && (mp < 0 || mp > 100))                        errs.margin_percent = "Must be 0 – 100";
+    if (!isNaN(mp) && (mp < 0 || mp > 100))                        errs.margin_percent       = "Must be 0 – 100";
     return errs;
   }
 
@@ -135,12 +187,17 @@ export default function OrderForm() {
       const payload = {
         ...form,
         salesperson_id:         salesperson,
-        scheme_id:              target?.scheme_id,
+        scheme_id:              target?.scheme_id ?? null,
         po_value:               Number(form.po_value),
         po_value_after_sharing: form.po_value_after_sharing !== ""
           ? Number(form.po_value_after_sharing)
           : null,
         margin_percent:         Number(form.margin_percent),
+        // Send calculated incentive values if available
+        ...(incentiveCalc && {
+          margin_multiplier: incentiveCalc.multiplier,
+          net_incentive:     incentiveCalc.expectedAmount,
+        }),
       };
       if (isEdit) { await updateOrder(id, payload); }
       else        { await createOrder(payload); }
@@ -153,9 +210,8 @@ export default function OrderForm() {
     }
   }
 
-  // Shared props passed to every Field so it stays stable
   const fieldProps = { form, fieldErrors, onChange: handleChange };
- 
+
   return (
     <>
       {/* Page header */}
@@ -200,12 +256,13 @@ export default function OrderForm() {
         </div>
       )}
 
-      {/* Salesperson read-only badge */}
+      {/* Salesperson badge */}
       {salesperson && (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-[#eef2fb] border border-[#c5d3e4]/40 px-4 py-2.5">
           <span className="material-symbols-outlined text-[#2d55a0] text-[16px]">person</span>
           <span className="text-[12.5px] text-[#374151]">
-            Salesperson: <span className="font-semibold text-[#111827]">{currentUser?.name ?? currentUser?.user_name ?? ""}</span><span className="ml-2 text-[11px] font-mono bg-[#dbe5f8] text-[#2d55a0] px-1.5 py-0.5 rounded">{salesperson}</span>
+            Salesperson: <span className="font-semibold text-[#111827]">{currentUser?.name ?? currentUser?.user_name ?? ""}</span>
+            <span className="ml-2 text-[11px] font-mono bg-[#dbe5f8] text-[#2d55a0] px-1.5 py-0.5 rounded">{salesperson}</span>
           </span>
         </div>
       )}
@@ -224,18 +281,13 @@ export default function OrderForm() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              {/* Invoice No — optional */}
               <Field label="Invoice No" name="invoice_no" placeholder="e.g. INV-2024-001" {...fieldProps} />
-
-              {/* Invoice Date — optional */}
               <Field label="Invoice Date" name="invoice_date" type="date" {...fieldProps} />
 
-              {/* Plant / Customer — required, full width */}
               <div className="sm:col-span-2">
                 <Field label="Plant / Customer" name="plant_customer" placeholder="e.g. Tata Motors, Pune" required {...fieldProps} />
               </div>
 
-              {/* Item Description — full width textarea */}
               <div className="sm:col-span-2">
                 <label className="block text-[12px] font-medium text-[#374151] mb-1">Item Description</label>
                 <textarea
@@ -248,21 +300,15 @@ export default function OrderForm() {
                 />
               </div>
 
-              {/* PO Number */}
               <Field label="PO Number" name="po_number" placeholder="e.g. PO-12345" required {...fieldProps} />
-
-              {/* PO Date */}
               <Field label="PO Date" name="po_date" type="date" required {...fieldProps} />
-
-              {/* PO Value — required */}
               <Field label="PO Value (₹)" name="po_value" type="number" placeholder="e.g. 500000" required {...fieldProps} />
-
-              {/* PO Value After Sharing */}
               <Field label="PO Value After Sharing (₹)" name="po_value_after_sharing" type="number" placeholder="Leave blank to use PO Value" {...fieldProps} />
 
-              {/* New Product / Customer */}
               <div>
-                <label className="block text-[12px] font-medium text-[#374151] mb-1">New Product / Customer<span className="text-[#ba1a1a] ml-0.5">*</span></label>
+                <label className="block text-[12px] font-medium text-[#374151] mb-1">
+                  New Product / Customer<span className="text-[#ba1a1a] ml-0.5">*</span>
+                </label>
                 <select
                   name="new_product_customer"
                   value={form.new_product_customer}
@@ -272,13 +318,13 @@ export default function OrderForm() {
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
                 </select>
-                {fieldErrors.new_product_customer && <p className="text-[11.5px] text-[#ba1a1a] mt-0.5">{fieldErrors.new_product_customer}</p>}
+                {fieldErrors.new_product_customer && (
+                  <p className="text-[11.5px] text-[#ba1a1a] mt-0.5">{fieldErrors.new_product_customer}</p>
+                )}
               </div>
 
-              {/* Margin % — required */}
               <Field label="Margin %" name="margin_percent" type="number" placeholder="e.g. 22" required {...fieldProps} />
 
-              {/* Remarks — full width textarea */}
               <div className="sm:col-span-2">
                 <label className="block text-[12px] font-medium text-[#374151] mb-1">Remarks</label>
                 <textarea
@@ -291,6 +337,42 @@ export default function OrderForm() {
                 />
               </div>
 
+              {/* ── Expected Incentive ── */}
+              {achievementRules.length > 0 && (
+                <div className="sm:col-span-2 pt-2">
+                  <p className="text-[12px] font-semibold text-[#374151] mb-1.5">Expected Incentive</p>
+                  <div className="flex flex-col gap-0.5">
+                    {[...achievementRules]
+                      .sort((a, b) => Number(a.sequence) - Number(b.sequence))
+                      .map((rule) => {
+                        const poVal  = form.po_value_after_sharing !== ""
+                          ? Number(form.po_value_after_sharing)
+                          : Number(form.po_value);
+                        const rate   = Number(rule.incentive_rate);
+                        let payoutLabel;
+                        if (rule.incentive_type === "MONTHLY_SALARY") {
+                          payoutLabel = { text: "Monthly Salary", color: "#2d55a0" };
+                        } else if (!isNaN(poVal) && poVal > 0 && !isNaN(rate)) {
+                          const amt = poVal * (rate / 100);
+                          payoutLabel = { text: `₹${amt.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, color: amt > 0 ? "#166534" : "#6b7280" };
+                        } else {
+                          payoutLabel = { text: "—", color: "#9ca3af" };
+                        }
+                        return (
+                          <div key={rule.id} className="flex items-center justify-between py-1.5 border-b border-[#f0f4fa] last:border-0">
+                            <span className="text-[12.5px] text-[#374151]">
+                              {rule.min_achievement}% – {rule.max_achievement != null ? `${rule.max_achievement}%` : "∞"}
+                            </span>
+                            <span className="text-[13px] font-semibold" style={{ color: payoutLabel.color }}>
+                              {payoutLabel.text}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
 
@@ -301,9 +383,7 @@ export default function OrderForm() {
               disabled={saving || success}
               className="inline-flex items-center gap-1.5 rounded-lg bg-[#2d55a0] px-5 py-2.5 text-[13px] font-medium text-white hover:bg-[#234690] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving && (
-                <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-              )}
+              {saving && <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>}
               {saving ? "Saving..." : (isEdit ? "Update Order" : "Create Order")}
             </button>
             <button
