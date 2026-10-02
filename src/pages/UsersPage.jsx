@@ -38,7 +38,7 @@ function Field({ label, required, error, children }) {
   );
 }
 
-const EMPTY_FORM = { user_name: "", name: "", email_id: "", password: "" };
+const EMPTY_FORM = { user_name: "", name: "", email_id: "", password: "", employee_id: "" };
 
 function AddUserModal({ onClose, onAdded }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -92,6 +92,7 @@ function AddUserModal({ onClose, onAdded }) {
         name: form.name.trim(),
         email_id: form.email_id.trim(),
         password: form.password,
+        employee_id:form.employee_id,
       });
       onAdded(created);
       onClose();
@@ -168,6 +169,16 @@ function AddUserModal({ onClose, onAdded }) {
                 placeholder="e.g. rakesh123"
                 value={form.user_name}
                 onChange={(e) => handleChange("user_name", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Employee ID" error={errors.employee_id}>
+              <input
+                className={base}
+                style={iStyle(errors.employee_id)}
+                placeholder="e.g. EMP001"
+                value={form.employee_id}
+                onChange={(e) => handleChange("employee_id", e.target.value)}
               />
             </Field>
 

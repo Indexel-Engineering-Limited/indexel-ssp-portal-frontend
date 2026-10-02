@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getOrders } from "../../../services/incentiveService";
+import { getOrders, getEmployeeTarget } from "../../../services/incentiveService";
+import { getCurrentUser } from "../../../services/authService";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -32,13 +33,21 @@ export default function IncentiveOrders() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [target, setTarget] = useState(null);
 
   async function load() {
     setLoading(true);
     setError(null);
+    const currentUser = getCurrentUser();
+    const empId = currentUser?.employee_id ?? currentUser?.id;
     try {
-      const data = await getOrders();
+      const [data, targetData] = await Promise.all([
+        getOrders(),
+        empId ? getEmployeeTarget(empId).catch(() => null) : Promise.resolve(null),
+      ]);
+      console.log(targetData[0]);
       setOrders(Array.isArray(data) ? data : []);
+      setTarget(targetData[0]);
     } catch (err) {
       setError(err.message ?? "Failed to load orders");
     } finally {
@@ -127,6 +136,39 @@ export default function IncentiveOrders() {
         </div>
       </div>
 
+      {/* Target banner */}
+      {target && (
+        <div className="mb-4 rounded-xl border border-[#c5d3e4]/40 bg-white shadow-sm overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#eef2fb] flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[#2d55a0] text-[20px]">flag</span>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">My Target — FY {target.financial_year}</p>
+                <p className="text-[22px] font-bold text-[#111827] leading-tight">
+                  ₹{Number(target.target_amount).toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 px-1">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Scheme ID</p>
+                <p className="text-[15px] font-bold text-[#2d55a0]">{target.scheme_id}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Status</p>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11.5px] font-medium capitalize ${
+                  target.status === "active"   ? "bg-[#dcfce7] text-[#166534]" :
+                  target.status === "achieved" ? "bg-[#dbe5f8] text-[#1e3a8a]" :
+                  "bg-[#f3f4f6] text-[#6b7280]"
+                }`}>{target.status ?? "—"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Error banner */}
       {error && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[#ffdad6] bg-[#ffdad6]/40 px-4 py-3">
@@ -151,12 +193,13 @@ export default function IncentiveOrders() {
                 <tr className="bg-[#f8fafd] text-[#374151] text-[11px] font-semibold uppercase tracking-wider border-b border-[#d4e0f0]/50">
                   <th className="py-2.5 px-4">Invoice No</th>
                   <th className="py-2.5 px-4">Invoice Date</th>
-                  <th className="py-2.5 px-4">Salesperson</th>
+                  
                   <th className="py-2.5 px-4">Plant / Customer</th>
                   <th className="py-2.5 px-4 text-right">PO Value</th>
+                  <th className="py-2.5 px-4">PO Value Sharing</th>
                   <th className="py-2.5 px-4 text-right">Margin %</th>
                   <th className="py-2.5 px-4 text-right">Net Incentive</th>
-                  <th className="py-2.5 px-4">Status</th>
+                  
                   <th className="py-2.5 px-4 text-center">Actions</th>
                 </tr>
               </thead>
@@ -172,20 +215,19 @@ export default function IncentiveOrders() {
                     <tr key={order.id} className="border-b border-[#d4e0f0]/40 last:border-0 hover:bg-[#f0f4fa]/45">
                       <td className="px-4 py-3 font-medium">{order.invoice_no ?? "—"}</td>
                       <td className="px-4 py-3 text-[#374151]">{formatDate(order.invoice_date)}</td>
-                      <td className="px-4 py-3 text-[#374151]">{order.salesperson ?? "—"}</td>
+                      
                       <td className="px-4 py-3 text-[#374151]">{order.plant_customer ?? "—"}</td>
                       <td className="px-4 py-3 text-right text-[#374151]">
                         {order.po_value != null ? `₹${Number(order.po_value).toLocaleString("en-IN")}` : "—"}
                       </td>
+                      <td className="px-4 py-3 text-[#374151]">{order.po_value_after_sharing ?? "-"}</td>
                       <td className="px-4 py-3 text-right text-[#374151]">
                         {order.margin_percent != null ? `${order.margin_percent}%` : "—"}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-[#2d55a0]">
                         {order.net_incentive != null ? `₹${Number(order.net_incentive).toLocaleString("en-IN")}` : "—"}
                       </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={order.status} />
-                      </td>
+                     
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button

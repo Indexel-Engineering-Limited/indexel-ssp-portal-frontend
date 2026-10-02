@@ -28,6 +28,7 @@ import SchemeDetails         from "./pages/OBSheetPanel/incentives/SchemeDetails
 import IncentiveOrders       from "./pages/OBSheetPanel/incentives/IncentiveOrders";
 import OrderForm             from "./pages/OBSheetPanel/incentives/OrderForm";
 import IncentiveCalculations from "./pages/OBSheetPanel/incentives/IncentiveCalculations";
+import EmployeeTargets       from "./pages/OBSheetPanel/incentives/EmployeeTargets";
 
 function RequireAuth() {
   const location = useLocation();
@@ -111,6 +112,7 @@ export default function App() {
             <Route path="/ob-sheet/incentives/orders/new"              element={<OrderForm />} />
             <Route path="/ob-sheet/incentives/orders/:id/edit"         element={<OrderForm />} />
             <Route path="/ob-sheet/incentives/calculations"            element={<IncentiveCalculations />} />
+            <Route path="/ob-sheet/incentives/targets"                   element={<EmployeeTargets />} />
             
             {/* Admin-only routes */}
             <Route element={<RequireAdmin />}>

@@ -63,8 +63,8 @@ const ROUTE_MAP = {
     to: "/ob-sheet/incentives/orders",
     end: false,
   },
-  incentive_calculations: {
-    to: "/ob-sheet/incentives/calculations",
+  incentive_targets: {
+    to: "/ob-sheet/incentives/targets",
     end: false,
   },
 };

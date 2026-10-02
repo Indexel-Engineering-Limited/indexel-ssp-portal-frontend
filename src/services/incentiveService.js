@@ -61,3 +61,24 @@ export const updateOrder = (id, d) =>
 
 export const calculateOrder = (data) =>
   api.post("/api/incentives/orders/calculate", data).then((r) => r.data?.data ?? r.data);
+
+// ─── Employee Targets ─────────────────────────────────────────────────────
+
+export const getTargets = () =>
+  api.get("/api/incentives/targets").then((r) => r.data?.data ?? r.data);
+
+export const getTarget = (id) =>
+  api.get(`/api/incentives/targets/${id}`).then((r) => r.data?.data ?? r.data);
+
+export const createTarget = (data) =>
+  api.post("/api/incentives/targets", data).then((r) => r.data?.data ?? r.data);
+
+export const updateTarget = (id, data) =>
+  api.put(`/api/incentives/targets/${id}`, data).then((r) => r.data?.data ?? r.data);
+
+export const patchTargetStatus = (id, status) =>
+  api.patch(`/api/incentives/targets/${id}/status`, { status }).then((r) => r.data?.data ?? r.data);
+
+// ─── Employee Target by employee id ──────────────────────────────────────
+export const getEmployeeTarget = (employeeId) =>
+  api.get(`/api/incentives/targets/employee/${employeeId}`).then((r) => r.data?.data ?? r.data);
