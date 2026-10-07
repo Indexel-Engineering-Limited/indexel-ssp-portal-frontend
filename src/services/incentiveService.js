@@ -82,3 +82,10 @@ export const patchTargetStatus = (id, status) =>
 // ─── Employee Target by employee id ──────────────────────────────────────
 export const getEmployeeTarget = (employeeId) =>
   api.get(`/api/incentives/targets/employee/${employeeId}`).then((r) => r.data?.data ?? r.data);
+
+// ─── Orders by employee (admin panel) ────────────────────────────────────
+export const getOrdersByEmployee = (salespersonId) =>
+  api.get(`/api/incentives/employee-order/${salespersonId}`).then((r) => r.data?.data ?? r.data);
+
+export const freezeOrders = (orderIds) =>
+  api.patch("/api/incentives/orders/freeze", { order_ids: orderIds }).then((r) => r.data?.data ?? r.data);

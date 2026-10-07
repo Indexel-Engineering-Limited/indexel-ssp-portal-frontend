@@ -1,4 +1,4 @@
-﻿﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllCompanies, getAllContacts } from "../services/companyService";
 import { formatDate, normalizeCompany, normalizeContact } from "../utils/mappers";

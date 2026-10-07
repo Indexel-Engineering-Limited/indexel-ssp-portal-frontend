@@ -147,7 +147,13 @@ export default function IncentiveOrders() {
         }, 0);
         const achPct = targetAmt > 0 ? (achieved / targetAmt) * 100 : 0;
         const capped = Math.min(achPct, 100);
-        const netEarned = orders.reduce((sum, o) => sum + (Number(o.net_incentive) || 0), 0);
+        const netEarned =
+          achPct >= 70
+            ? orders.reduce(
+              (sum, o) => sum + (Number(o.net_incentive) || 0),
+              0
+            )
+            : null;
         const remaining = Math.max(0, targetAmt * 0.7 - achieved);
         const isEligible = achPct >= 70;
         const barColor = achPct >= 100 ? "#16a34a" : achPct >= 70 ? "#2d55a0" : achPct >= 50 ? "#d97706" : "#ba1a1a";
@@ -169,8 +175,8 @@ export default function IncentiveOrders() {
                   </span>
                 </div>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${target.status === "active" ? "bg-[#dcfce7] text-[#166534]" :
-                    target.status === "achieved" ? "bg-[#dbe5f8] text-[#1e3a8a]" :
-                      "bg-[#f3f4f6] text-[#6b7280]"
+                  target.status === "achieved" ? "bg-[#dbe5f8] text-[#1e3a8a]" :
+                    "bg-[#f3f4f6] text-[#6b7280]"
                   }`}>{target.status ?? "—"}</span>
               </div>
 
@@ -201,7 +207,9 @@ export default function IncentiveOrders() {
                 }}>
                   <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#6b7280] mb-0.5">Net Incentive</p>
                   <p className="text-[15px] font-bold" style={{ color: netEarned > 0 ? "#166534" : "#9ca3af" }}>
-                    ₹{netEarned.toLocaleString("en-IN")}
+                    {isEligible
+                      ? `₹${netEarned.toLocaleString("en-IN")}`
+                      : "—"}
                   </p>
                 </div>
               </div>
