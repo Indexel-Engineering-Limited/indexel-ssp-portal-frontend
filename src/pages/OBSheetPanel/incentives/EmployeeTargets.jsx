@@ -342,22 +342,17 @@ export default function EmployeeTargets() {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+      <div className="incentive-stat-grid mb-5">
         {[
           { icon: "group",           label: "Total Employees Targeted", value: targets.length,                                              sub: `${activeCount} active` },
           { icon: "currency_rupee",  label: "Total Target Amount",      value: fmt(totalTarget),                                            sub: "All targets combined" },
           { icon: "schema",          label: "Schemes Used",             value: new Set(targets.map((t) => t.scheme_id)).size,               sub: `of ${schemes.length} schemes` },
         ].map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-[#e2e9f4] p-4 shadow-sm flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#eef2fb] flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[#2d55a0] text-[18px]">{c.icon}</span>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">{c.label}</p>
-              <p className="text-[20px] font-bold text-[#111827] leading-tight mt-0.5">{c.value}</p>
-              <p className="text-[11.5px] text-[#374151] mt-0.5">{c.sub}</p>
-            </div>
-          </div>
+          <article key={c.label} className="overview-stat">
+            <div className="overview-stat-label"><span className="overview-stat-dot" />{c.label}</div>
+            <div className="overview-stat-value">{c.value}</div>
+            <div className="overview-stat-detail">{c.sub}</div>
+          </article>
         ))}
       </div>
 

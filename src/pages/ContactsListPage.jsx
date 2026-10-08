@@ -2,6 +2,7 @@
 import TablePagination from "../components/company/TablePagination";
 import { getAllContacts } from "../services/companyService";
 import { normalizeContact } from "../utils/mappers";
+import OverviewStats from "../components/ui/ix/OverviewStats";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -79,6 +80,12 @@ export default function ContactsListPage() {
     [filteredContacts, page, pageSize]
   );
   const totalPages = Math.max(1, Math.ceil(filteredContacts.length / pageSize));
+  const overviewStats = [
+    { label: "Contacts", value: contacts.length.toLocaleString(), detail: "Saved contact records" },
+    { label: "Companies", value: new Set(contacts.map((item) => item.company_name).filter(Boolean)).size.toLocaleString(), detail: "With contacts" },
+    { label: "Departments", value: new Set(contacts.map((item) => item.department).filter(Boolean)).size.toLocaleString(), detail: "Represented" },
+    { label: "Designations", value: new Set(contacts.map((item) => item.designation).filter(Boolean)).size.toLocaleString(), detail: "Across the directory" },
+  ];
 
   function handleSearchChange(event) {
     setSearch(event.target.value);
@@ -127,6 +134,8 @@ export default function ContactsListPage() {
           </div>
         </div>
       </div>
+
+      <OverviewStats items={overviewStats} />
 
       {error && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[#ffdad6] bg-[#ffdad6]/40 px-4 py-3">

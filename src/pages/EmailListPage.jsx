@@ -5,6 +5,7 @@ import TablePagination from "../components/company/TablePagination";
 import { createEmailsBulk, getEmailList, deleteEmail, updateEmailType } from "../services/companyService";
 import { downloadEmailSampleExcel, parseEmailsExcel } from "../utils/contactExcel";
 import { canWriteModule } from "../services/authService";
+import OverviewStats from "../components/ui/ix/OverviewStats";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -93,6 +94,12 @@ export default function EmailListPage() {
     () => filteredEmails.slice((page - 1) * pageSize, page * pageSize),
     [filteredEmails, page, pageSize]
   );
+  const overviewStats = [
+    { label: "Email addresses", value: emails.length.toLocaleString(), detail: "Saved in the directory" },
+    { label: "Principal", value: emails.filter((entry) => entry.type?.toLowerCase() === "principal").length.toLocaleString(), detail: "Principal addresses" },
+    { label: "Customer", value: emails.filter((entry) => entry.type?.toLowerCase() === "customer").length.toLocaleString(), detail: "Customer addresses" },
+    { label: "Vendor", value: emails.filter((entry) => entry.type?.toLowerCase() === "vendor").length.toLocaleString(), detail: "Vendor addresses" },
+  ];
 
   function formatDate(value) {
     if (!value) return "—";
@@ -225,6 +232,8 @@ export default function EmailListPage() {
           </div>
         </div>
       </div>
+
+      <OverviewStats items={overviewStats} />
 
       {uploadStatus && <div className={`mb-4 rounded-lg px-4 py-3 text-[13px] ${uploadStatus.tone === "error" ? "bg-[#ffdad6]/40 text-[#ba1a1a]" : uploadStatus.tone === "success" ? "bg-[#dbe5f8] text-[#1e3a8a]" : "bg-[#eef2fb] text-[#374151]"}`}><p>{uploadStatus.message}</p>{uploadStatus.details.length > 0 && <ul className="mt-2 space-y-1 text-[12px] opacity-90">{uploadStatus.details.slice(0, 5).map((detail) => <li key={detail}>• {detail}</li>)}{uploadStatus.details.length > 5 && <li>• {uploadStatus.details.length - 5} more...</li>}</ul>}</div>}
 

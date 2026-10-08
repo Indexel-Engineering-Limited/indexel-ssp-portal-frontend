@@ -1,4 +1,4 @@
-﻿﻿
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import CompanyAvatar from "../components/company/CompanyAvatar";
@@ -25,6 +25,7 @@ import {
 } from "../utils/contactExcel";
 
 import { canWriteModule } from "../services/authService";
+import OverviewStats from "../components/ui/ix/OverviewStats";
 
 export default function CompanyDetailsPage() {
   const canEdit = canWriteModule("contacts");
@@ -467,50 +468,13 @@ export default function CompanyDetailsPage() {
           COMPANY DETAILS
       ================================================================ */}
 
-      <div className="grid grid-cols-1 gap-4 mb-6">
-        <div className="bg-[#f8fafd] rounded-xl border border-[#c5d3e4]/20 p-5 shadow-sm h-fit">
-          <h2 className="text-[12px] font-semibold uppercase tracking-wider text-[#6b7280] mb-4">
-            Company details
-          </h2>
-
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {[
-              {
-                label: "Company name",
-                value:
-                  company?.company_name || "—",
-              },
-              {
-                label: "Industry",
-                value: company?.industry || "—",
-              },
-              {
-                label: "Location",
-                value:
-                  company?.location || "—",
-              },
-              {
-                label: "Created",
-                value: formatDate(
-                  company?.created_at
-                ),
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="min-w-0"
-              >
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-[#6b7280] mb-1">
-                  {item.label}
-                </dt>
-
-                <dd className="text-[13px] font-medium text-[#111827] truncate">
-                  {item.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+      <div className="mb-6">
+        <OverviewStats items={[
+          { label: "Contact persons", value: sortedContacts.length.toLocaleString(), detail: "For this company" },
+          { label: "Industry", value: company?.industry || "—", detail: "Company profile" },
+          { label: "Location", value: company?.location || "—", detail: "Company profile" },
+          { label: "Added", value: formatDate(company?.created_at), detail: "Directory record" },
+        ]} />
 
         {/* ================================================================
             CONTACTS
@@ -560,215 +524,56 @@ export default function CompanyDetailsPage() {
               </p>
             </div>
           ) : (
-            /* Contact cards */
-
-            <div className="overflow-x-auto">
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {sortedContacts.map(
-                    (contact) => (
-                      <div
-                        key={contact.id}
-                        className="group rounded-xl border border-[#d4e0f0]/60 bg-white p-4 shadow-sm hover:shadow-md hover:border-[#a6bcee] transition-all"
-                      >
-                        {/* ==================================================
-                            CONTACT HEADER
-                        ================================================== */}
-
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {/* Avatar */}
-
-                            <div className="w-11 h-11 rounded-full bg-[#eef2fb] flex items-center justify-center shrink-0">
-                              <span className="material-symbols-outlined text-[#2d55a0] text-[22px]">
-                                person
-                              </span>
-                            </div>
-
-                            <div className="min-w-0">
-                              <h3 className="text-[14px] font-semibold text-[#111827] truncate">
-                                {contact.person_name ||
-                                  "Unnamed Contact"}
-                              </h3>
-
-                              <p className="text-[12px] text-[#6b7280] truncate">
-                                {contact.designation ||
-                                  "No designation"}
-                              </p>
-                            </div>
+            <div className="company-contacts-table overflow-x-auto">
+              <table className="w-full min-w-[1040px] text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th>Contact</th>
+                    <th>Department</th>
+                    <th>Email address</th>
+                    <th>Phone</th>
+                    <th>Location</th>
+                    <th>Added</th>
+                    <th className="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedContacts.map((contact) => (
+                    <tr key={contact.id}>
+                      <td>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <CompanyAvatar name={contact.person_name || "Contact"} />
+                          <div className="min-w-0">
+                            <div className="truncate font-semibold text-[#24252A]">{contact.person_name || "Unnamed Contact"}</div>
+                            <div className="truncate text-[12px] text-[#6b7280]">{contact.designation || "—"}</div>
                           </div>
-
-                          {/* ==================================================
-                              THREE DOT MENU
-                          ================================================== */}
-
+                        </div>
+                      </td>
+                      <td>{contact.department || "—"}</td>
+                      <td>
+                        {contact.email ? <a className="font-medium text-[#285598] hover:underline" href={`mailto:${contact.email}`}>{contact.email}</a> : "—"}
+                      </td>
+                      <td>{contact.contact_number || "—"}</td>
+                      <td><span className="block max-w-[220px] truncate" title={contact.address || ""}>{contact.address || "—"}</span></td>
+                      <td className="whitespace-nowrap">{formatDate(contact.created_at)}</td>
+                      <td>
+                        <div className="flex items-center justify-end gap-1">
+                          {contact.email && <a href={`mailto:${contact.email}`} className="flex h-8 w-8 items-center justify-center rounded-md text-[#6b7280] hover:bg-[#eef2fb] hover:text-[#285598]" title="Send email"><span className="material-symbols-outlined text-[17px]">mail</span></a>}
                           <div className="relative">
-                            <button
-                              type="button"
-                              disabled={!canEdit}
-                              onClick={() =>
-                                setOpenMenuId(
-                                  openMenuId ===
-                                    contact.id
-                                    ? null
-                                    : contact.id
-                                )
-                              }
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6b7280] hover:bg-[#f0f6f1] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                more_vert
-                              </span>
+                            <button type="button" disabled={!canEdit} onClick={() => setOpenMenuId(openMenuId === contact.id ? null : contact.id)} className="flex h-8 w-8 items-center justify-center rounded-md text-[#6b7280] hover:bg-[#f0f4fa] disabled:cursor-not-allowed disabled:opacity-40" aria-label={`Actions for ${contact.person_name || "contact"}`}>
+                              <span className="material-symbols-outlined text-[18px]">more_horiz</span>
                             </button>
-
-                            {/* Dropdown */}
-
-                            {openMenuId ===
-                              contact.id &&
-                              canEdit && (
-                                <div className="absolute right-0 top-9 z-50 w-36 rounded-lg border border-[#d4e0f0] bg-white shadow-lg overflow-hidden">
-                                  {/* Edit */}
-
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setEditingContact(
-                                        contact
-                                      );
-                                      setOpenMenuId(
-                                        null
-                                      );
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-[12.5px] text-[#111827] hover:bg-[#f5f7fb] transition-colors"
-                                  >
-                                    <span className="material-symbols-outlined text-[17px] text-[#2d55a0]">
-                                      edit
-                                    </span>
-
-                                    Edit
-                                  </button>
-
-                                  {/* Delete */}
-
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setDeletingContact(
-                                        contact
-                                      );
-                                      setOpenMenuId(
-                                        null
-                                      );
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-[12.5px] text-[#ba1a1a] hover:bg-[#fff1f0] transition-colors"
-                                  >
-                                    <span className="material-symbols-outlined text-[17px]">
-                                      delete
-                                    </span>
-
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
+                            {openMenuId === contact.id && canEdit && <div className="absolute right-0 top-9 z-50 w-36 overflow-hidden rounded-lg border border-[#e5e7eb] bg-white shadow-lg">
+                              <button type="button" onClick={() => { setEditingContact(contact); setOpenMenuId(null); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[12.5px] text-[#24252A] hover:bg-[#f7f8fa]"><span className="material-symbols-outlined text-[17px] text-[#285598]">edit</span>Edit</button>
+                              <button type="button" onClick={() => { setDeletingContact(contact); setOpenMenuId(null); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[12.5px] text-[#D64545] hover:bg-[#FDECEC]"><span className="material-symbols-outlined text-[17px]">delete</span>Delete</button>
+                            </div>}
                           </div>
                         </div>
-
-                        {/* ==================================================
-                            CONTACT INFORMATION
-                        ================================================== */}
-
-                        <div className="space-y-2.5">
-                          {contact.email && (
-                            <a
-                              href={`mailto:${contact.email}`}
-                              className="flex items-center gap-2.5 text-[12.5px] text-[#374151] hover:text-[#111827] group/link"
-                            >
-                              <span className="material-symbols-outlined text-[17px] text-[#6b7280]">
-                                mail
-                              </span>
-
-                              <span className="truncate group-hover/link:underline">
-                                {contact.email}
-                              </span>
-                            </a>
-                          )}
-
-                          {contact.contact_number && (
-                            <a
-                              
-                              className="flex items-center gap-2.5 text-[12.5px] text-[#374151] hover:text-[#111827] group/link"
-                            >
-                              <span className="material-symbols-outlined text-[17px] text-[#6b7280]">
-                                phone
-                              </span>
-
-                              <span className="group-hover/link:underline">
-                                {
-                                  contact.contact_number
-                                }
-                              </span>
-                            </a>
-                          )}
-
-                          {contact.address && (
-                            <div className="flex items-start gap-2.5 text-[12.5px] text-[#374151]">
-                              <span className="material-symbols-outlined text-[17px] text-[#6b7280]">
-                                location_on
-                              </span>
-
-                              <span className="line-clamp-2">
-                                {contact.address}
-                              </span>
-                            </div>
-                          )}
-
-                          {contact.department && (
-                            <div className="flex items-center gap-2.5 text-[12.5px] text-[#374151]">
-                              <span className="material-symbols-outlined text-[17px] text-[#6b7280]">
-                                business_center
-                              </span>
-
-                              <span className="truncate">
-                                {
-                                  contact.department
-                                }
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* ==================================================
-                            CONTACT FOOTER
-                        ================================================== */}
-
-                        <div className="mt-4 pt-3 border-t border-[#d4e0f0]/50 flex items-center justify-between">
-                          <span className="text-[10.5px] text-[#6b7280]">
-                            Added{" "}
-                            {formatDate(
-                              contact.created_at
-                            )}
-                          </span>
-
-                          <div className="flex items-center gap-1">
-                            {contact.email && (
-                              <a
-                                href={`mailto:${contact.email}`}
-                                className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-[#eef2fb] text-[#6b7280]"
-                                title="Send email"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">
-                                  mail
-                                </span>
-                              </a>
-                            )}
-
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -891,3 +696,5 @@ export default function CompanyDetailsPage() {
     </>
   );
 }
+
+

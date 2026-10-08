@@ -451,7 +451,7 @@ export default function CompanySignature() {
                 <br />
                 Looking forward to your feedback.
               </div>
-              <div ref={previewRef} dangerouslySetInnerHTML={{ __html: signatureHtml }} />
+              <div className="signature-preview" ref={previewRef} dangerouslySetInnerHTML={{ __html: signatureHtml }} />
             </div>
           </div>
         </div>

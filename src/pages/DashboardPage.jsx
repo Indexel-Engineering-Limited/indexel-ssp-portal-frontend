@@ -1,33 +1,17 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllCompanies, getAllContacts } from "../services/companyService";
 import { formatDate, normalizeCompany, normalizeContact } from "../utils/mappers";
 
-function MetricCard({ icon, label, value, detail, to }) {
+function MetricCard({ label, value, detail, to }) {
   return (
     <Link
       to={to}
-      className="block rounded-xl p-5 transition-all hover:-translate-y-0.5"
-      style={{
-        background:  "#ffffff",
-        border:      "1px solid #e2e9f4",
-        boxShadow:   "0 2px 12px rgba(45,85,160,0.07)",
-        fontFamily:  "'Inter','Hanken Grotesk',sans-serif",
-      }}
+      className="overview-stat metric-stat-link"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">{label}</p>
-          <p className="mt-2 text-[32px] leading-none font-bold text-[#111827]">{value}</p>
-          <p className="mt-2 text-[12px] text-[#374151]">{detail}</p>
-        </div>
-        <div
-          className="flex h-11 w-11 items-center justify-center rounded-xl shrink-0"
-          style={{ background: "#eef2fb", color: "#2d55a0" }}
-        >
-          <span className="material-symbols-outlined text-[22px]">{icon}</span>
-        </div>
-      </div>
+      <div className="overview-stat-label"><span className="overview-stat-dot" />{label}</div>
+      <div className="overview-stat-value">{value}</div>
+      <div className="overview-stat-detail">{detail}</div>
     </Link>
   );
 }
@@ -36,17 +20,17 @@ function SectionCard({ title, subtitle, linkLabel, linkTo, loading, emptyMsg, ch
   return (
     <section
       className="overflow-hidden rounded-xl"
-      style={{ background: "#ffffff", border: "1px solid #e2e9f4", boxShadow: "0 2px 12px rgba(45,85,160,0.07)" }}
+      style={{ background: "#ffffff", border: "1px solid #E5E7EB", boxShadow: "0 2px 8px rgba(13,39,74,0.04)" }}
     >
       <div
         className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid #f0f4fa" }}
+        style={{ borderBottom: "1px solid #F7F8FA" }}
       >
         <div>
-          <h2 className="text-[14.5px] font-semibold text-[#111827]">{title}</h2>
+          <h2 className="text-[14.5px] font-semibold text-[#24252A]">{title}</h2>
           <p className="mt-0.5 text-[11.5px] text-[#6b7280]">{subtitle}</p>
         </div>
-        <Link to={linkTo} className="text-[12px] font-semibold transition-colors hover:underline" style={{ color: "#2d55a0" }}>
+        <Link to={linkTo} className="text-[12px] font-semibold transition-colors hover:underline" style={{ color: "#285598" }}>
           {linkLabel}
         </Link>
       </div>
@@ -83,23 +67,25 @@ export default function DashboardPage() {
   const companyNames    = useMemo(() => new Map(companies.map((c) => [String(c.id), c.company_name])), [companies]);
   const recentCompanies = useMemo(() => [...companies].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 5), [companies]);
   const recentContacts  = useMemo(() => [...contacts].sort( (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 5), [contacts]);
+  const industryCount = useMemo(() => new Set(companies.map((company) => company.industry).filter(Boolean)).size, [companies]);
+  const locationCount = useMemo(() => new Set(companies.map((company) => company.location).filter(Boolean)).size, [companies]);
 
   const rowCls = "flex items-center justify-between gap-4 px-5 py-3.5 transition-colors last:border-0";
-  const rowStyle = { borderBottom: "1px solid #f0f4fa" };
+  const rowStyle = { borderBottom: "1px solid #F7F8FA" };
 
   return (
     <div className="max-w-7xl mx-auto" style={{ fontFamily: "'Inter','Hanken Grotesk',sans-serif" }}>
       {/* Page title */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-[#2d55a0]">Overview</p>
-          <h1 className="mt-1 text-[24px] font-bold tracking-tight text-[#111827]">Dashboard</h1>
-          <p className="mt-1 text-[13px] text-[#374151]">Companies and contacts at a glance.</p>
+          <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-[#285598]">Overview</p>
+          <h1 className="mt-1 text-[24px] font-bold tracking-tight text-[#24252A]">Dashboard</h1>
+          <p className="mt-1 text-[13px] text-[#44464D]">Companies and contacts at a glance.</p>
         </div>
         <Link
           to="/bulk-upload"
           className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: "#2d55a0", boxShadow: "0 4px 14px rgba(45,85,160,0.28)" }}
+          style={{ background: "#285598", boxShadow: "0 2px 8px rgba(13,39,74,0.12)" }}
         >
           <span className="material-symbols-outlined text-[17px]">upload_file</span>
           Bulk Upload
@@ -118,9 +104,11 @@ export default function DashboardPage() {
       )}
 
       {/* Metric cards */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <MetricCard icon="corporate_fare" label="Total Companies" value={loading ? "—" : companies.length} detail="Companies in the directory" to="/companies" />
-        <MetricCard icon="groups"         label="Total Contacts"  value={loading ? "—" : contacts.length}  detail="Contact persons across all companies" to="/bulk-upload" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="Companies" value={loading ? "—" : companies.length} detail="In the directory" to="/companies" />
+        <MetricCard label="Contacts" value={loading ? "—" : contacts.length} detail="Across all companies" to="/bulk-upload" />
+        <MetricCard label="Industries" value={loading ? "—" : industryCount} detail="Represented" to="/companies" />
+        <MetricCard label="Locations" value={loading ? "—" : locationCount} detail="Company locations" to="/companies" />
       </div>
 
       {/* Recent tables */}
@@ -132,11 +120,11 @@ export default function DashboardPage() {
             <div>
               {recentCompanies.map((c) => (
                 <Link key={c.id} to={`/companies/${c.id}`} className={rowCls} style={rowStyle}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f8fafd")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFBFC")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-[#111827]">{c.company_name}</p>
+                    <p className="truncate text-[13px] font-semibold text-[#24252A]">{c.company_name}</p>
                     <p className="mt-0.5 truncate text-[11.5px] text-[#6b7280]">
                       {c.industry || "—"} &bull; {c.location || "—"}
                     </p>
@@ -155,11 +143,11 @@ export default function DashboardPage() {
             <div>
               {recentContacts.map((c) => (
                 <Link key={c.id} to={`/companies/${c.company_details_id}`} className={rowCls} style={rowStyle}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f8fafd")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFBFC")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-[#111827]">{c.person_name || "Unnamed"}</p>
+                    <p className="truncate text-[13px] font-semibold text-[#24252A]">{c.person_name || "Unnamed"}</p>
                     <p className="mt-0.5 truncate text-[11.5px] text-[#6b7280]">
                       {companyNames.get(String(c.company_details_id)) || `Company ${c.company_details_id}`} &bull; {c.designation || "—"}
                     </p>

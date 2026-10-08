@@ -20,6 +20,7 @@ import {
 } from "../../services/employeeService";
 import EditEmployeeModal from "../../components/ui/EditEmployeeModal";
 import BulkUploadEmployeeModal from "../../components/ui/BulkUploadEmployeeModal";
+import OverviewStats from "../../components/ui/ix/OverviewStats";
 
 
 // ─────────────────────────────────────────────────────────────
@@ -399,7 +400,7 @@ const EmployeePanel = () => {
 
 
     return (
-        <div className="w-full min-h-screen bg-[#f8fafc] p-4">
+        <div className="employee-management-page w-full min-h-screen">
 
             {/* ───────────────────────────────────────────────────── */}
             {/* HEADER */}
@@ -419,17 +420,6 @@ const EmployeePanel = () => {
 
                 <div className="flex items-center gap-3">
 
-                    {/* Total Employees Badge */}
-                    <div className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#eef3fb] border border-[#d4e0f0]">
-                        <span className="text-[13px] font-medium text-[#374151]">
-                            Total Employees
-                        </span>
-
-                        <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-2 rounded-full bg-[#2d55a0] text-white text-[12px] font-semibold">
-                            {employees.length}
-                        </span>
-                    </div>
-
                     {/* Add Employee */}
                     <button
                         type="button"
@@ -443,6 +433,13 @@ const EmployeePanel = () => {
                 </div>
 
             </div>
+
+            <OverviewStats items={[
+                { label: "Employees", value: employees.length.toLocaleString(), detail: "In the directory" },
+                { label: "Active", value: employees.filter((employee) => String(employee.status || "").toLowerCase() === "active").length.toLocaleString(), detail: "Current employees" },
+                { label: "Departments", value: new Set(employees.map((employee) => employee.department).filter(Boolean)).size.toLocaleString(), detail: "Represented" },
+                { label: "Locations", value: new Set(employees.map((employee) => employee.location).filter(Boolean)).size.toLocaleString(), detail: "Employee locations" },
+            ]} />
 
 
             {/* ───────────────────────────────────────────────────── */}
@@ -514,40 +511,40 @@ const EmployeePanel = () => {
 
                 <div className="overflow-x-auto">
 
-                    <table className="w-full">
+                    <table className="employee-list-table w-full min-w-[1080px]" style={{ tableLayout: "fixed" }}>
 
                         <thead>
                             <tr className="bg-[#f8fafd] border-b border-[#e5e7eb]">
 
-                                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[23%] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Employee
                                 </th>
 
-                                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[11%] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Employee ID
                                 </th>
 
-                                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[12%] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Department
                                 </th>
 
-                                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[16%] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Designation
                                 </th>
 
-                                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[13%] px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Location
                                 </th>
 
-                                <th className="px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[7%] px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     QR Code
                                 </th>
 
-                                <th className="px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[9%] px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Actions
                                 </th>
 
-                                <th className="px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="w-[9%] px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     Status
                                 </th>
 
@@ -625,14 +622,14 @@ const EmployeePanel = () => {
                                                             employee.employee_image
                                                         )}
                                                         alt={employee.name}
-                                                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                                                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
                                                     />
 
                                                 ) : (
 
-                                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                                                         <UserRound
-                                                            size={18}
+                                                            size={15}
                                                             className="text-gray-400"
                                                         />
                                                     </div>
@@ -641,11 +638,11 @@ const EmployeePanel = () => {
 
                                                 <div>
 
-                                                    <p className="text-sm font-semibold text-gray-800">
+                                                    <p className="max-w-[220px] truncate text-[13px] font-semibold text-gray-800" title={employee.name}>
                                                         {employee.name}
                                                     </p>
 
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="max-w-[220px] truncate text-[11px] text-gray-500" title={employee.email || "No email"}>
                                                         {employee.email || "No email"}
                                                     </p>
 
@@ -658,29 +655,29 @@ const EmployeePanel = () => {
 
                                         {/* Employee ID */}
 
-                                        <td className="px-5 py-4 text-sm font-medium text-gray-700">
-                                            {employee.employee_id}
+                                        <td className="whitespace-nowrap px-5 py-4 font-medium text-gray-700">
+                                            <span className="block truncate" title={employee.employee_id}>{employee.employee_id}</span>
                                         </td>
 
 
                                         {/* Department */}
 
-                                        <td className="px-5 py-4 text-sm text-gray-600">
-                                            {employee.department || "-"}
+                                        <td className="px-5 py-4 text-gray-600">
+                                            <span className="block truncate" title={employee.department || "-"}>{employee.department || "-"}</span>
                                         </td>
 
 
                                         {/* Designation */}
 
-                                        <td className="px-5 py-4 text-sm text-gray-600">
-                                            {employee.designation || "-"}
+                                        <td className="px-5 py-4 text-gray-600">
+                                            <span className="block truncate" title={employee.designation || "-"}>{employee.designation || "-"}</span>
                                         </td>
 
 
                                         {/* Location */}
 
-                                        <td className="px-5 py-4 text-sm text-gray-600">
-                                            {employee.location || "-"}
+                                        <td className="px-5 py-4 text-gray-600">
+                                            <span className="block truncate" title={employee.location || "-"}>{employee.location || "-"}</span>
                                         </td>
 
 
@@ -695,13 +692,13 @@ const EmployeePanel = () => {
                                                         employee.qr_image
                                                     )}
                                                     alt="Employee QR"
-                                                    className="w-12 h-12 mx-auto object-contain"
+                                                    className="w-8 h-8 mx-auto object-contain"
                                                 />
 
                                             ) : (
 
                                                 <QrCode
-                                                    size={22}
+                                                    size={16}
                                                     className="mx-auto text-gray-300"
                                                 />
 
@@ -718,26 +715,26 @@ const EmployeePanel = () => {
 
                                                 <button
                                                     onClick={() => navigate(`/hr-management/card/${employee.id}`)}
-                                                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                                                    className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#EDF3FC] text-[#285598] hover:bg-[#D4E4FB] transition"
                                                     title="View ID Card"
                                                 >
-                                                    <Eye size={16} />
+                                                    <Eye size={14} />
                                                 </button>
 
                                                 <button
                                                     onClick={() => openEditModal(employee)}
-                                                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition"
+                                                    className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#E8F6EF] text-[#24734F] hover:bg-green-100 transition"
                                                     title="Edit Employee"
                                                 >
-                                                    <Pencil size={16} />
+                                                    <Pencil size={14} />
                                                 </button>
 
                                                 {/* <button
                                                     onClick={() => setDeleteConfirm(employee)}
-                                                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
+                                                    className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#FDECEC] text-[#D64545] hover:bg-red-100 transition"
                                                     title="Delete Employee"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={14} />
                                                 </button> */}
 
                                             </div>

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, logout } from "../../services/authService";
 
@@ -11,7 +11,7 @@ const notifications = [
 function Avatar({ name }) {
   const initials = String(name || "U").split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white" style={{ background: "linear-gradient(135deg,#2d55a0,#3a6fd8)" }}>
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold text-white" style={{ background: "#285598" }}>
       {initials}
     </div>
   );
@@ -44,20 +44,19 @@ export default function Header({ onMenuToggle }) {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 lg:left-[220px] h-14 z-40 flex items-center justify-between px-4"
+      className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between px-4 md:left-[72px] lg:left-[220px]"
       style={{
         background:     "rgba(255,255,255,0.96)",
         backdropFilter: "blur(12px)",
         borderBottom:   "1px solid #e2e9f4",
-        boxShadow:      "0 1px 8px rgba(45,85,160,0.06)",
-        fontFamily:     "'Inter','Hanken Grotesk',sans-serif",
+        boxShadow:      "0 1px 4px rgba(13,39,74,0.03)",
       }}>
 
       {/* ── Hamburger (mobile only) ── */}
       <button
         aria-label="Open menu"
         onClick={onMenuToggle}
-        className="flex lg:hidden h-9 w-9 items-center justify-center rounded-lg mr-2 transition-colors hover:bg-[#f3f6fb] text-[#374151] shrink-0">
+        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg mr-2 transition-colors hover:bg-[#f3f6fb] text-[#374151] shrink-0">
         <span className="material-symbols-outlined text-[22px]">menu</span>
       </button>
 
@@ -66,10 +65,10 @@ export default function Header({ onMenuToggle }) {
         <div className="relative flex items-center">
           <span className="material-symbols-outlined absolute left-3 text-[#6b7280] text-[17px] pointer-events-none">search</span>
           <input
-            className="w-full rounded-full py-1.5 pl-9 pr-4 text-[12.5px] text-[#111827] outline-none transition-all"
-            style={{ background: "#f3f6fb", border: "1.5px solid #dde4ef", fontFamily: "inherit" }}
-            onFocus={(e)  => { e.target.style.borderColor = "#2d55a0"; e.target.style.boxShadow = "0 0 0 3px rgba(45,85,160,0.09)"; }}
-            onBlur={(e)   => { e.target.style.borderColor = "#dde4ef"; e.target.style.boxShadow = "none"; }}
+            className="w-full rounded-md py-1.5 pl-9 pr-4 text-[12.5px] text-[#24252a] outline-none transition-all"
+            style={{ background: "#f7f8fa", border: "1px solid #e5e7eb", fontFamily: "inherit" }}
+            onFocus={(e)  => { e.target.style.borderColor = "#4085e4"; e.target.style.boxShadow = "0 0 0 3px rgba(64,133,228,0.14)"; }}
+            onBlur={(e)   => { e.target.style.borderColor = "#e5e7eb"; e.target.style.boxShadow = "none"; }}
             placeholder="Search…"
             type="text" />
         </div>

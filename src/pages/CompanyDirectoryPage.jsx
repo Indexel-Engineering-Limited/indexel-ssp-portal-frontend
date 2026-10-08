@@ -7,6 +7,7 @@ import EditCompanyModal from "../components/ui/EditCompanyModal";
 import { createCompany, getAllCompanies, updateCompany } from "../services/companyService";
 import { normalizeCompany } from "../utils/mappers";
 import { canWriteModule } from "../services/authService";
+import OverviewStats from "../components/ui/ix/OverviewStats";
 
 const DEFAULT_FILTERS = {
   city: "All",
@@ -104,6 +105,12 @@ export default function CompanyDirectoryPage() {
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const overviewStats = [
+    { label: "Companies", value: companies.length.toLocaleString(), detail: "In the directory" },
+    { label: "Industries", value: new Set(companies.map((item) => item.industry).filter(Boolean)).size.toLocaleString(), detail: "Represented" },
+    { label: "Cities", value: new Set(companies.map((item) => item.city).filter(Boolean)).size.toLocaleString(), detail: "Across locations" },
+    { label: "States", value: new Set(companies.map((item) => item.state).filter(Boolean)).size.toLocaleString(), detail: "Across India" },
+  ];
 
   async function handleEdit(companyId, payload) {
     const updated = await updateCompany(companyId, payload);
@@ -138,6 +145,8 @@ export default function CompanyDirectoryPage() {
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         onPageSizeChange={handlePageSizeChange}
       />
+
+      <OverviewStats items={overviewStats} />
 
       {error && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[#ffdad6] bg-[#ffdad6]/40 px-4 py-3">

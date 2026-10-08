@@ -21,17 +21,13 @@ function StatusBadge({ status }) {
 }
 
 function StatCard({ icon, label, value, sub }) {
+  const dotColor = icon === "currency_rupee" ? "#0298CA" : icon === "receipt_long" ? "#4085E4" : "#285598";
   return (
-    <div className="bg-white rounded-xl border border-[#e2e9f4] p-5 shadow-sm flex items-start gap-4">
-      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#eef2fb] shrink-0">
-        <span className="material-symbols-outlined text-[#2d55a0] text-[20px]">{icon}</span>
-      </div>
-      <div className="min-w-0">
-        <p className="text-[12px] font-semibold uppercase tracking-wider text-[#6b7280]">{label}</p>
-        <p className="text-[28px] font-bold text-[#111827] mt-1 leading-none">{value}</p>
-        {sub && <p className="text-[12px] text-[#374151] mt-1">{sub}</p>}
-      </div>
-    </div>
+    <article className="overview-stat">
+      <div className="overview-stat-label"><span className="overview-stat-dot" style={{ backgroundColor: dotColor }} />{label}</div>
+      <div className="overview-stat-value">{value}</div>
+      {sub && <div className="overview-stat-detail">{sub}</div>}
+    </article>
   );
 }
 
@@ -126,7 +122,7 @@ export default function IncentiveDashboard() {
       ) : (
         <>
           {/* Stats grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="incentive-stat-grid mb-6">
             <StatCard
               icon="schema"
               label="Total Schemes"

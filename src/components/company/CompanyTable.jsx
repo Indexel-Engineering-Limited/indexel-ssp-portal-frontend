@@ -18,7 +18,7 @@ export default function CompanyTable({
 
   return (
     <div
-      className="overflow-hidden flex flex-col mb-6 rounded-xl"
+      className="company-directory-table overflow-hidden flex flex-col mb-6 rounded-xl"
       style={{
         background:  "#ffffff",
         border:      "1px solid #e2e9f4",
@@ -33,15 +33,15 @@ export default function CompanyTable({
       />
 
       <div className="overflow-x-auto w-full">
-        <table className="w-full text-left border-collapse" style={{ minWidth: "640px" }}>
+        <table className="w-full text-left border-collapse" style={{ minWidth: "640px", tableLayout: "fixed" }}>
           <thead>
             <tr
               className="text-[11px] font-semibold uppercase tracking-wider"
               style={{ background: "#f8fafd", borderBottom: "1px solid #e2e9f4", color: "#6b7280" }}
             >
-              <th className="py-2.5 px-4 w-[42%]">Company</th>
-              <th className="py-2.5 px-3 w-[24%] hidden sm:table-cell">Industry</th>
-              <th className="py-2.5 px-3 w-[24%] hidden md:table-cell">Location</th>
+              <th className="py-2.5 px-4 w-[50%]">Company</th>
+              <th className="py-2.5 px-3 w-[22%] hidden sm:table-cell">Industry</th>
+              <th className="py-2.5 px-3 w-[18%] hidden md:table-cell">Location</th>
               <th className="py-2.5 px-4 text-right w-[10%]">Actions</th>
             </tr>
           </thead>

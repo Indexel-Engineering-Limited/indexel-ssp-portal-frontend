@@ -43,6 +43,7 @@ export default function LoginPage() {
         bulk_upload: "/bulk-upload",
         user_access: "/user-access",
         user_logs: "/user-logs",
+        
         users: "/users",
         employee_list:"/hr-management"
       };
@@ -174,7 +175,7 @@ export default function LoginPage() {
 
         /* ── Right form panel ── */
         .ssp-right {
-          width: 500px;
+          width:40%;
           flex-shrink: 0;
           background: #ffffff;
           display: flex;
