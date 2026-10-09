@@ -403,9 +403,9 @@ export default function LoginPage() {
           box-shadow: 0 8px 20px rgba(40,84,152,0.3);
         }
         .lp-brand-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .lp-brand-logo { width: 140px; height: 28px; }
+        .lp-brand-logo { width: 150px; height: 68px; }
         .lp-brand-logo img { width: 100%; height: 100%; object-fit: contain; object-position: left center; display: block; }
-        .lp-brand-sub { font-size: 11px; font-weight: 600; color: var(--brand); letter-spacing: 0.02em; }
+        .lp-brand-sub { font-size: 16px; font-weight: 600; color: var(--brand); letter-spacing: 0.02em;font-family:cursive;margin-left:12px;font-style:italic; }
 
         .lp-status {
           display: inline-flex;
@@ -699,12 +699,7 @@ export default function LoginPage() {
         <div className="lp-right">
           <div className="lp-form-wrap">
             <div className="lp-brand">
-              <div className="lp-brand-mark">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" fill="white" fillOpacity="0.92" />
-                  <path d="M12 6L17 9V15L12 18L7 15V9L12 6Z" fill="#285498" fillOpacity="0.35" />
-                </svg>
-              </div>
+              
               <div className="lp-brand-text">
                 <div className="lp-brand-logo">
                   <img src={logo} alt="Self Service Portal" />
