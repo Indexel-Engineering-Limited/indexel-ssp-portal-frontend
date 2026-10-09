@@ -302,46 +302,60 @@ export default function IncentiveOrders() {
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((order) => (
-                    <tr key={order.id} className="border-b border-[#d4e0f0]/40 last:border-0 hover:bg-[#f0f4fa]/45">
-                      <td className="px-4 py-3 font-medium">{order.invoice_no ?? "—"}</td>
-                      <td className="px-4 py-3 text-[#374151]">{formatDate(order.invoice_date)}</td>
+                  paginated.map((order) => {
+                    const isFrozen = order.isEditable === 0;
+                    return (
+                      <tr
+                        key={order.id}
+                        className="border-b border-[#d4e0f0]/40 last:border-0 hover:bg-[#f0f4fa]/45"
+                        style={isFrozen ? { background: "#f5f3ff" } : undefined}
+                      >
+                        <td className="px-4 py-3 font-medium">{order.invoice_no ?? "—"}</td>
+                        <td className="px-4 py-3 text-[#374151]">{formatDate(order.invoice_date)}</td>
 
-                      <td className="px-4 py-3 text-[#374151]">{order.plant_customer ?? "—"}</td>
-                      <td className="px-4 py-3 text-[#374151]">{order.po_number ?? "-"}</td>
-                      <td className="px-4 py-3 text-[#374151]">
-                        {order.po_date
-                          ? new Date(order.po_date).toLocaleDateString("en-GB", {
-                            timeZone: "UTC",
-                          })
-                          : "-"}
-                      </td>
-                      <td className="px-4 py-3 text-right text-[#374151]">
-                        {order.po_value != null ? `₹${Number(order.po_value).toLocaleString("en-IN")}` : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-[#374151]">{order.po_value_after_sharing ?? "-"}</td>
+                        <td className="px-4 py-3 text-[#374151]">{order.plant_customer ?? "—"}</td>
+                        <td className="px-4 py-3 text-[#374151]">{order.po_number ?? "-"}</td>
+                        <td className="px-4 py-3 text-[#374151]">
+                          {order.po_date
+                            ? new Date(order.po_date).toLocaleDateString("en-GB", {
+                              timeZone: "UTC",
+                            })
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3 text-right text-[#374151]">
+                          {order.po_value != null ? `₹${Number(order.po_value).toLocaleString("en-IN")}` : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-[#374151]">{order.po_value_after_sharing ?? "-"}</td>
 
-                      <td className="px-4 py-3 text-right text-[#374151]">
-                        {order.margin_percent != null ? `${order.margin_percent}%` : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-[#2d55a0]">
-                        {order.net_incentive != null ? `₹${Number(order.net_incentive).toLocaleString("en-IN")}` : "—"}
-                      </td>
+                        <td className="px-4 py-3 text-right text-[#374151]">
+                          {order.margin_percent != null ? `${order.margin_percent}%` : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-[#2d55a0]">
+                          {order.net_incentive != null ? `₹${Number(order.net_incentive).toLocaleString("en-IN")}` : "—"}
+                        </td>
 
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/ob-sheet/incentives/orders/${order.id}/edit`)}
-                            title="Edit order"
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#374151] hover:bg-[#eef2fb] hover:text-[#2d55a0] transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[17px]">edit</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() =>{
+                                console.log("isEditable:", order.isEditable);
+                                navigate(`/ob-sheet/incentives/orders/${order.id}/edit`, {
+                                  state: { isEditable: order.isEditable },
+                                })
+                              }}
+                              title="Edit order"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#374151] hover:bg-[#eef2fb] hover:text-[#2d55a0] transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[17px]">
+                                edit
+                              </span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

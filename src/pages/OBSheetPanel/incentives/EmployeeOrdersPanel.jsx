@@ -13,7 +13,9 @@ function fmtDate(v) {
   const d = new Date(v);
   return isNaN(d.getTime()) ? "—" : d.toLocaleDateString("en-IN");
 }
-function StatusBadge({ status }) {
+function StatusBadge({ order }) {
+  const isFrozen = order.isEditable === 0;
+  const status = isFrozen ? "frozen" : order.status;
   const map = {
     draft:    "bg-[#fef9c3] text-[#854d0e]",
     submitted:"bg-[#dbe5f8] text-[#1e3a8a]",
@@ -296,12 +298,11 @@ export default function EmployeeOrdersPanel() {
                 ) : (
                   visibleOrders.map((order, idx) => {
                     const isChecked = selected.has(order.id);
-                    const isFrozen  = order.status === "frozen";
                     return (
                       <tr
                         key={order.id}
                         className="hover:bg-[#f8fafd] transition-colors cursor-pointer"
-                        style={{ background: isChecked ? "#eef2fb" : isFrozen ? "#f5f3ff" : undefined }}
+                        style={{ background: isChecked ? "#eef2fb" : order.isEditable === 0 ? "#f5f3ff" : undefined }}
                         onClick={() => toggleOne(order.id)}
                       >
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -327,7 +328,7 @@ export default function EmployeeOrdersPanel() {
                           {fmt(order.net_incentive)}
                         </td>
                         <td className="px-4 py-3">
-                          <StatusBadge status={order.status} />
+                          <StatusBadge order={order} />
                         </td>
                       </tr>
                     );

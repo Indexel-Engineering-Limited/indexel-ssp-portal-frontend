@@ -1,7 +1,7 @@
-import { NavLink, useLocation } from "react-router-dom";
+﻿import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Activity, BadgeCheck, Building2, ChevronDown, Database, FileSpreadsheet, Folder, LayoutDashboard, LockKeyhole, Mail, Menu, PenLine, Settings, Shield, Users, X } from "lucide-react";
-import logo from "../../assets/logo.png";
+import sspLogo from "../../assets/ssp-logo.png";
 import { getPermissions } from "../../services/authService";
 
 const ROUTE_MAP = {
@@ -9,6 +9,7 @@ const ROUTE_MAP = {
   bulk_upload: { to: "/bulk-upload", end: false }, user_access: { to: "/user-access", end: false }, user_logs: { to: "/user-logs", end: false }, users: { to: "/users", end: false },
   employee_list: { to: "/hr-management", end: true }, incentive_dashboard: { to: "/ob-sheet/incentives", end: true }, incentive_schemes: { to: "/ob-sheet/incentives/schemes", end: false },
   incentive_orders: { to: "/ob-sheet/incentives/orders", end: false }, incentive_targets: { to: "/ob-sheet/incentives/targets", end: false },
+  incentive_manage: { to: "/ob-sheet/incentives/employee-orders", end: false },
 };
 const iconFor = (name = "") => {
   const key = name.toLowerCase();
@@ -49,9 +50,8 @@ export default function Sidebar({ open, onClose }) {
 
   const sidebarContent = <aside className="indexel-sidebar flex h-full w-[280px] flex-col md:w-[72px] lg:w-[220px]">
     <div className="sidebar-brand flex h-16 shrink-0 items-center gap-3 px-4">
-      <div className="sidebar-logo"><img alt="Indexel" className="h-8 w-8 object-contain" src={logo} /></div>
-      <div className="nav-label min-w-0"><div className="truncate text-[13px] font-bold">Self Service Portal</div><div className="mt-0.5 text-[9px] font-medium uppercase tracking-[.12em] text-white/55">Employee Services</div></div>
-      <button aria-label="Close menu" onClick={onClose} className="ml-auto flex h-8 w-8 items-center justify-center text-white/70 hover:text-white md:hidden"><X size={19} /></button>
+      <img alt="SSP" className="nav-label h-10 w-full object-cover" src={sspLogo} />
+      <button aria-label="Close menu" onClick={onClose} className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center text-white/70 hover:text-white md:hidden"><X size={19} /></button>
     </div>
     <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-5">
       {Object.entries(navItems).filter(([name]) => name !== "account").map(([name, items]) => {

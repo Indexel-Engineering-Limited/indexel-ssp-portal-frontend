@@ -1,7 +1,67 @@
 ﻿import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { login, getPermissions } from "../services/authService";
-import logo from '../assets/login-logo.png';
+import logo from "../assets/login-logo.png";
+import sspLogo from "../assets/ssp-logo.png";
+
+/* ── Orbit data: the modules people actually sign in to use ── */
+const ICONS = {
+  dashboard: "M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z",
+  companies: "M3 21h18 M5 21V7l7-4 7 4v14 M9 9h.01 M9 13h.01 M9 17h.01 M15 9h.01 M15 13h.01 M15 17h.01",
+  contacts: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+  emails: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M22 6l-10 7L2 6",
+  upload: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12",
+  hr: "M2 7h20v14H2z M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",
+  logs: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
+};
+
+const RING_INNER = [
+  { label: "Companies", icon: "companies", angle: 200 },
+  { label: "Contacts", icon: "contacts", angle: 320 },
+  { label: "Emails", icon: "emails", angle: 80 },
+];
+
+const RING_OUTER = [
+  { label: "Dashboard", icon: "dashboard", angle: 250 },
+  { label: "Bulk upload", icon: "upload", angle: 345 },
+  { label: "HR management", icon: "hr", angle: 60 },
+  { label: "User logs", icon: "logs", angle: 150 },
+];
+
+function Icon({ name, size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={ICONS[name]} />
+    </svg>
+  );
+}
+
+function Chip({ item, accent }) {
+  // Place each chip on its ring using percentages so the stage scales fluidly
+  const rad = (item.angle * Math.PI) / 180;
+  const left = 50 + 50 * Math.cos(rad);
+  const top = 50 + 50 * Math.sin(rad);
+  return (
+    <div className="lp-chip" style={{ left: `${left}%`, top: `${top}%` }}>
+      <div className="lp-chip-counter">
+        <div className={`lp-chip-body ${accent ? "is-accent" : ""}`}>
+          <Icon name={item.icon} size={14} />
+          <span>{item.label}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -9,7 +69,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ user_name: "", password: "", remember: false });
   const [error, setError] = useState(null);
+  const [errorKey, setErrorKey] = useState(0); // re-triggers the shake on every new error
   const [submitting, setSubmitting] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
+
+  function fail(message) {
+    setError(message);
+    setErrorKey((k) => k + 1);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,11 +84,7 @@ export default function LoginPage() {
     setError(null);
 
     if (!form.user_name || !form.password) {
-      setError(
-        !form.user_name
-          ? "Enter your username or email."
-          : "Enter your password."
-      );
+      fail(!form.user_name ? "Enter your username or email." : "Enter your password.");
       return;
     }
 
@@ -43,9 +106,8 @@ export default function LoginPage() {
         bulk_upload: "/bulk-upload",
         user_access: "/user-access",
         user_logs: "/user-logs",
-        
         users: "/users",
-        employee_list:"/hr-management"
+        employee_list: "/hr-management",
       };
 
       // Find the first module for which the user has read access
@@ -78,13 +140,13 @@ export default function LoginPage() {
       }
 
       if (!redirectPath) {
-        setError("You do not have access to any module.");
+        fail("You do not have access to any module.");
         return;
       }
 
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      setError(err.message || "Invalid credentials. Please try again.");
+      fail(err.message || "Invalid credentials. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -93,590 +155,697 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap');
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .lp-root, .lp-root *, .lp-root *::before, .lp-root *::after { box-sizing: border-box; }
+        .lp-root button, .lp-root input { font-family: inherit; }
 
-        .ssp-root {
-          min-height: 100vh;
+        .lp-root {
+          --navy-900: #081a38;
+          --navy-800: #0d2650;
+          --brand: #285498;
+          --brand-bright: #3b82f6;
+          --sky: #38bdf8;
+          --amber: #fbbf24;
+          --ink: #0f1c36;
+          --muted: #64748b;
+          --line: #dbe3ef;
+          --surface: #f6f8fc;
+          position: fixed;
+          inset: 0;
+          height: 100vh;
+          height: 100dvh;
           width: 100%;
+          overflow: hidden;
           display: flex;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Manrope', system-ui, sans-serif;
           background: #fff;
+          color: var(--ink);
         }
 
-        /* ── Left animated panel ── */
-        .ssp-left {
+        /* ─────────── LEFT: brand stage ─────────── */
+        .lp-left {
           flex: 1;
-          background: #285498;
           position: relative;
           overflow: hidden;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          padding: clamp(64px, 10vh, 96px) 40px clamp(56px, 9vh, 88px);
+          background:
+            radial-gradient(120% 90% at 15% 0%, #1b4a93 0%, transparent 55%),
+            linear-gradient(160deg, var(--navy-800) 0%, var(--navy-900) 100%);
         }
 
-        .ssp-left-top {
+        .lp-blob {
           position: absolute;
-          top: 28px;
-          left: 32px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          border-radius: 50%;
+          filter: blur(70px);
+          opacity: 0.55;
+          will-change: transform;
+        }
+        .lp-blob.b1 { width: 380px; height: 380px; background: #2f6fe0; top: -120px; left: -90px; animation: drift1 18s ease-in-out infinite alternate; }
+        .lp-blob.b2 { width: 320px; height: 320px; background: #0ea5c6; bottom: -110px; right: -60px; opacity: 0.4; animation: drift2 22s ease-in-out infinite alternate; }
+        .lp-blob.b3 { width: 200px; height: 200px; background: var(--amber); top: 55%; left: 62%; opacity: 0.14; animation: drift3 16s ease-in-out infinite alternate; }
+
+        @keyframes drift1 { to { transform: translate(90px, 70px) scale(1.15); } }
+        @keyframes drift2 { to { transform: translate(-80px, -60px) scale(1.2); } }
+        @keyframes drift3 { to { transform: translate(-60px, 50px) scale(0.8); } }
+
+        .lp-grid {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(rgba(255,255,255,0.22) 1px, transparent 1px);
+          background-size: 26px 26px;
+          -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 20%, transparent 100%);
+          mask-image: radial-gradient(60% 60% at 50% 50%, #000 20%, transparent 100%);
+        }
+
+        .lp-left-top {
+          position: absolute;
+          top: 30px;
+          left: 36px;
           z-index: 5;
         }
+        .lp-left-top img { height: 42px; width: auto; max-width: 220px; object-fit: contain; display: block; }
 
-        .ssp-left-logo {
-          width: 34px;
-          height: 34px;
-          background: rgba(255,255,255,0.18);
-          border-radius: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .ssp-left-brand { font-size: 16px; font-weight: 700; color: #fff; }
-        .ssp-left-sub {
-          font-size: 10px;
-          color: rgba(255,255,255,0.5);
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          margin-top: 1px;
-        }
-
-        .ssp-left-bottom {
-          position: absolute;
-          bottom: 24px;
-          left: 0; right: 0;
+        .lp-pitch {
+          position: relative;
+          z-index: 3;
           text-align: center;
-          font-size: 11px;
-          color: rgba(255,255,255,0.32);
-          font-weight: 500;
+          max-width: 420px;
+          margin-bottom: clamp(4px, 1.5vh, 14px);
         }
-
-        /* SVG scene animations */
-        .float1 { animation: f1 3.5s ease-in-out infinite; }
-        .float2 { animation: f2 4s ease-in-out infinite 0.6s; }
-        .float3 { animation: f3 3s ease-in-out infinite 1.2s; }
-        .float4 { animation: f4 4.5s ease-in-out infinite 0.3s; }
-        .pulse  { animation: pulse 2s ease-in-out infinite; }
-        .pulse2 { animation: pulse 2s ease-in-out infinite 1s; }
-        .dash   { animation: dash 1.5s linear infinite; }
-        .slide  { animation: slide 2s ease-in-out infinite alternate; }
-
-        @keyframes f1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes f2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
-        @keyframes f3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-        @keyframes f4 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-        @keyframes dash  { to{stroke-dashoffset:-20} }
-        @keyframes slide { 0%{transform:scaleX(0.3)} 100%{transform:scaleX(1)} }
-
-        /* ── Right form panel ── */
-        .ssp-right {
-          width:40%;
-          flex-shrink: 0;
-          background: #ffffff;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 52px 48px;
-        }
-
-        @media (max-width: 860px) {
-          .ssp-left { display: none; }
-          .ssp-right { width: 100%; padding: 40px 28px; }
-        }
-
-        .ssp-right-logo {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          margin-bottom: 36px;
-        }
-
-        .ssp-right-mark {
-          width: 48px; height: 48px;
-          background: linear-gradient(135deg, #285498, #346ab9);
-          border-radius: 8px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .ssp-brand-name { font-size: 13px; font-weight: 700; color: #6c2bd9; }
-        .ssp-brand-sub  { font-size: 10px; color: #a78bfa; letter-spacing: 0.06em; text-transform: uppercase; }
-
-        .ssp-heading {
-          font-size: 30px;
+        .lp-pitch h2 {
+          font-family: 'Sora', sans-serif;
+          font-size: clamp(24px, 2.6vw, 34px);
           font-weight: 700;
-          color: #1e1b4b;
-          letter-spacing: -0.025em;
-          line-height: 1.15;
-          margin-bottom: 8px;
-          font-family: sans-serif;
+          line-height: 1.2;
+          letter-spacing: -0.02em;
+          color: #fff;
+          margin: 0 0 10px;
+        }
+        .lp-pitch p {
+          font-size: 14px;
+          line-height: 1.6;
+          color: rgba(255,255,255,0.68);
+          margin: 0;
         }
 
-        .ssp-desc {
-          font-size: 13.5px;
-          color: #9ca3af;
-          margin-bottom: 30px;
-          line-height: 1.5;
+        /* Orbit stage — the one memorable element */
+        .lp-stage {
+          position: relative;
+          z-index: 2;
+          width: min(440px, 100%, 46vh);
+          aspect-ratio: 1;
+          margin-top: 6px;
+          flex-shrink: 0;
         }
 
-        /* Form */
-        .ssp-fg { margin-bottom: 16px; position: relative; }
-
-        .ssp-label {
-          display: block;
-          font-size: 11px;
-          font-weight: 600;
-          color: #6b7280;
-          margin-bottom: 6px;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-        }
-
-        .ssp-icon {
+        .lp-ring {
           position: absolute;
-          left: 12px;
-          top: calc(50% + 10px);
-          transform: translateY(-50%);
-          color: #d1d5db;
-          pointer-events: none;
-          transition: color 0.18s;
-          display: flex;
+          top: 50%;
+          left: 50%;
+          border-radius: 50%;
+          border: 1.5px dashed rgba(255,255,255,0.22);
+          transform: translate(-50%, -50%);
         }
+        .lp-ring.inner { width: 54%; height: 54%; }
+        .lp-ring.outer { width: 94%; height: 94%; border-color: rgba(255,255,255,0.14); }
 
-        .ssp-fg:focus-within .ssp-icon { color: #6c2bd9; }
+        .lp-spin { position: absolute; inset: 0; border-radius: 50%; }
+        .lp-ring.inner .lp-spin { animation: spin-cw 34s linear infinite; }
+        .lp-ring.outer .lp-spin { animation: spin-ccw 52s linear infinite; }
 
-        .ssp-input {
-          width: 100%;
-          height: 44px;
-          border: 1.5px solid #e5e7eb;
-          border-radius: 10px;
-          padding: 0 40px 0 38px;
-          font-size: 13.5px;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-          color: #1e1b4b;
-          background: #f9fafb;
-          outline: none;
-          transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
-        }
+        @keyframes spin-cw  { to { transform: rotate(360deg); } }
+        @keyframes spin-ccw { to { transform: rotate(-360deg); } }
 
-        .ssp-input::placeholder { color: #d1d5db; }
-
-        .ssp-input:focus {
-          border-color: #6c2bd9;
-          background: #fff;
-          box-shadow: 0 0 0 3px rgba(108,43,217,0.12);
-        }
-
-        .ssp-eye {
+        /* A bright comet that travels the inner ring */
+        .lp-comet {
           position: absolute;
-          right: 10px;
-          top: calc(50% + 10px);
-          transform: translateY(-50%);
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: #d1d5db;
-          padding: 4px;
-          border-radius: 5px;
-          display: flex;
-          transition: color 0.18s, background 0.18s;
+          top: 0; left: 50%;
+          width: 9px; height: 9px;
+          margin: -4.5px 0 0 -4.5px;
+          border-radius: 50%;
+          background: var(--amber);
+          box-shadow: 0 0 0 4px rgba(251,191,36,0.18), 0 0 18px 4px rgba(251,191,36,0.7);
         }
 
-        .ssp-eye:hover { color: #6c2bd9; background: rgba(108,43,217,0.08); }
+        .lp-chip { position: absolute; width: 0; height: 0; }
+        .lp-chip-counter { width: 0; height: 0; }
+        .lp-ring.inner .lp-chip-counter { animation: spin-ccw 34s linear infinite; }
+        .lp-ring.outer .lp-chip-counter { animation: spin-cw 52s linear infinite; }
 
-        /* Remember row */
-        .ssp-rem-row {
-          display: flex;
-          align-items: center;
-          margin-bottom: 24px;
-          margin-top: 4px;
-        }
-
-        .ssp-rem-label {
+        .lp-chip-body {
+          position: absolute;
+          transform: translate(-50%, -50%);
           display: flex;
           align-items: center;
           gap: 7px;
-          cursor: pointer;
-          user-select: none;
-          font-size: 12.5px;
-          color: #6b7280;
-          font-weight: 500;
+          white-space: nowrap;
+          padding: 8px 13px 8px 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #fff;
+          background: rgba(255,255,255,0.12);
+          border: 1px solid rgba(255,255,255,0.28);
+          -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 8px 24px rgba(3,10,30,0.28);
         }
+        .lp-chip-body svg { color: var(--sky); flex-shrink: 0; }
+        .lp-chip-body.is-accent svg { color: var(--amber); }
 
-        /* Error */
-        .ssp-error {
+        /* Core */
+        .lp-core {
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 104px; height: 104px;
+          transform: translate(-50%, -50%);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .lp-core::before, .lp-core::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          border: 1.5px solid rgba(56,189,248,0.6);
+          animation: ripple 3.6s ease-out infinite;
+        }
+        .lp-core::after { animation-delay: 1.8s; }
+        @keyframes ripple {
+          0%   { transform: scale(0.9); opacity: 0.9; }
+          100% { transform: scale(2.1); opacity: 0; }
+        }
+        .lp-core-disc {
+          position: relative;
+          width: 84px; height: 84px;
+          border-radius: 26px;
+          display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(145deg, #ffffff 0%, #dbeafe 100%);
+          color: var(--brand);
+          box-shadow: 0 0 0 8px rgba(255,255,255,0.1), 0 18px 44px rgba(2,8,24,0.5), 0 0 60px rgba(56,189,248,0.35);
+          transform: rotate(-8deg);
+        }
+        .lp-core-disc svg { transform: rotate(8deg); }
+
+        .lp-trust {
+          position: absolute;
+          bottom: 26px;
+          left: 0; right: 0;
+          z-index: 3;
           display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          background: #fef2f2;
-          border: 1.5px solid #fecaca;
-          border-radius: 9px;
-          padding: 10px 13px;
-          margin-bottom: 16px;
-          font-size: 12.5px;
-          color: #dc2626;
-          line-height: 1.4;
+          justify-content: center;
+          gap: 18px;
+          flex-wrap: wrap;
+          padding: 0 24px;
+          font-size: 11.5px;
+          font-weight: 600;
+          color: rgba(255,255,255,0.6);
+        }
+        .lp-trust span { display: inline-flex; align-items: center; gap: 6px; }
+        .lp-trust svg { color: #4ade80; }
+
+        /* ─────────── RIGHT: form ─────────── */
+        .lp-right {
+          width: 44%;
+          min-width: 420px;
+          flex-shrink: 0;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: clamp(12px, 3vh, 48px) clamp(32px, 5vw, 72px);
+          overflow: hidden;
+          background:
+            radial-gradient(60% 40% at 100% 0%, rgba(59,130,246,0.09), transparent 70%),
+            #fff;
+        }
+        .lp-right::before {
+          content: "";
+          position: absolute;
+          left: 0; top: 0; bottom: 0;
+          width: 3px;
+          background: linear-gradient(180deg, var(--brand-bright), var(--sky) 50%, var(--amber));
         }
 
-        /* Submit */
-        .ssp-btn {
+        .lp-form-wrap { width: 100%; max-width: 400px; margin: 0 auto; }
+
+        .lp-brand { display: flex; align-items: center; gap: 12px; margin-bottom: clamp(14px, 3.4vh, 34px); }
+        .lp-brand-mark {
+          width: 46px; height: 46px;
+          border-radius: 13px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          background: linear-gradient(135deg, var(--brand), var(--brand-bright));
+          box-shadow: 0 8px 20px rgba(40,84,152,0.3);
+        }
+        .lp-brand-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .lp-brand-logo { width: 140px; height: 28px; }
+        .lp-brand-logo img { width: 100%; height: 100%; object-fit: contain; object-position: left center; display: block; }
+        .lp-brand-sub { font-size: 11px; font-weight: 600; color: var(--brand); letter-spacing: 0.02em; }
+
+        .lp-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 5px 12px 5px 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #166534;
+          background: #ecfdf3;
+          border: 1px solid #bbf7d0;
+          margin-bottom: clamp(10px, 2.2vh, 18px);
+        }
+        .lp-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+        .lp-dot::after {
+          content: ""; position: absolute; inset: 0; border-radius: 50%;
+          background: #22c55e; animation: dot-pulse 2s ease-out infinite;
+        }
+        @keyframes dot-pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
+
+        .lp-heading {
+          font-family: 'Sora', sans-serif;
+          font-size: 32px;
+          font-weight: 700;
+          letter-spacing: -0.03em;
+          line-height: 1.15;
+          margin: 0 0 8px;
+          color: var(--ink);
+        }
+        .lp-desc { font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0 0 clamp(14px, 3vh, 28px); }
+
+        /* Floating-label fields */
+        .lp-field { position: relative; margin-bottom: clamp(10px, 1.8vh, 14px); }
+
+        .lp-input {
           width: 100%;
-          height: 46px;
-          background: #2d55a0;
+          height: clamp(52px, 7vh, 58px);
+          padding: 20px 46px 6px 48px;
+          font-size: 14.5px;
+          font-weight: 500;
+          color: var(--ink);
+          background: var(--surface);
+          border: 1.5px solid var(--line);
+          border-radius: 14px;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .lp-input:hover { border-color: #b8c6dc; }
+        .lp-input:focus {
+          background: #fff;
+          border-color: var(--brand-bright);
+          box-shadow: 0 0 0 4px rgba(59,130,246,0.14);
+        }
+
+        .lp-label {
+          position: absolute;
+          left: 48px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 14px;
+          font-weight: 500;
+          color: #8a97ad;
+          pointer-events: none;
+          transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease;
+        }
+        .lp-input:focus + .lp-label,
+        .lp-input:not(:placeholder-shown) + .lp-label {
+          top: 17px;
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--brand);
+        }
+
+        .lp-icon {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          display: flex;
+          color: #9aa7bd;
+          pointer-events: none;
+          transition: color 0.2s;
+        }
+        .lp-field:focus-within .lp-icon { color: var(--brand-bright); }
+
+        .lp-eye {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 38px; height: 38px;
+          display: flex; align-items: center; justify-content: center;
+          background: none;
           border: none;
           border-radius: 10px;
-          font-size: 14.5px;
-          font-weight: 700;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-          color: #ffffff;
+          color: #9aa7bd;
           cursor: pointer;
+          transition: color 0.2s, background 0.2s;
+        }
+        .lp-eye:hover { color: var(--brand); background: rgba(40,84,152,0.08); }
+
+        .lp-caps {
+          display: flex; align-items: center; gap: 6px;
+          margin: -6px 0 10px 4px;
+          font-size: 12px; font-weight: 600; color: #b45309;
+        }
+
+        .lp-row {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 8px;
-          letter-spacing: -0.01em;
-          transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
-          box-shadow: 0 4px 14px rgba(108,43,217,0.35);
-          margin-bottom: 22px;
-        }
-          .ssp-brand-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-}
-
-.ssp-brand-logo {
-  width: 145px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
-}
-
-.ssp-brand-logo img {
-  width: 100%;
-  height: 90%;
-  object-fit: contain;
-  object-position: left center;
-  display: block;
-}
-
-.ssp-brand-sub {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #285498;
-      margin-left: 8px;
-}
-
-        .ssp-btn:hover:not(:disabled) {
-          background: #5b21b6;
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(108,43,217,0.45);
+          justify-content: space-between;
+          gap: 12px;
+          margin: 4px 0 clamp(14px, 2.6vh, 22px);
         }
 
-        .ssp-btn:active:not(:disabled) { transform: translateY(0); }
-        .ssp-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .lp-check { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 500; color: #475569; }
+        .lp-check input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .lp-box {
+          width: 18px; height: 18px;
+          border-radius: 6px;
+          border: 1.5px solid #b8c6dc;
+          background: #fff;
+          display: flex; align-items: center; justify-content: center;
+          transition: background 0.18s, border-color 0.18s, transform 0.18s;
+        }
+        .lp-box svg { opacity: 0; transform: scale(0.5); transition: opacity 0.18s, transform 0.18s; color: #fff; }
+        .lp-check input:checked + .lp-box { background: var(--brand); border-color: var(--brand); }
+        .lp-check input:checked + .lp-box svg { opacity: 1; transform: scale(1); }
+        .lp-check input:focus-visible + .lp-box { outline: 3px solid rgba(59,130,246,0.4); outline-offset: 2px; }
 
-        .ssp-spinner {
-          width: 16px; height: 16px;
+        .lp-link {
+          background: none; border: none; padding: 2px 0; cursor: pointer;
+          font-size: 13px; font-weight: 600; color: var(--brand);
+          border-radius: 4px;
+        }
+        .lp-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+        .lp-error {
+          display: flex; align-items: flex-start; gap: 9px;
+          padding: 11px 14px;
+          margin-bottom: 16px;
+          border-radius: 12px;
+          background: #fef2f2;
+          border: 1.5px solid #fecaca;
+          font-size: 13px; line-height: 1.45; font-weight: 500; color: #b91c1c;
+          animation: shake 0.45s cubic-bezier(.36,.07,.19,.97);
+        }
+        .lp-error svg { flex-shrink: 0; margin-top: 2px; }
+        @keyframes shake {
+          10%, 90% { transform: translateX(-1px); }
+          20%, 80% { transform: translateX(3px); }
+          30%, 50%, 70% { transform: translateX(-5px); }
+          40%, 60% { transform: translateX(5px); }
+        }
+
+        .lp-btn {
+          position: relative;
+          overflow: hidden;
+          width: 100%;
+          height: clamp(46px, 6.4vh, 52px);
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          border: none;
+          border-radius: 14px;
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: -0.005em;
+          color: #fff;
+          cursor: pointer;
+          background: linear-gradient(120deg, var(--brand) 0%, var(--brand-bright) 100%);
+          box-shadow: 0 10px 26px rgba(40,84,152,0.34);
+          transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
+        }
+        .lp-btn::after {
+          content: "";
+          position: absolute;
+          top: 0; bottom: 0; left: -60%;
+          width: 40%;
+          background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+          transform: skewX(-20deg);
+        }
+        .lp-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(40,84,152,0.42); }
+        .lp-btn:hover:not(:disabled)::after { left: 130%; transition: left 0.7s ease; }
+        .lp-btn:active:not(:disabled) { transform: translateY(0); }
+        .lp-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .lp-btn:focus-visible, .lp-link:focus-visible, .lp-eye:focus-visible { outline: 3px solid rgba(59,130,246,0.45); outline-offset: 3px; }
+        .lp-btn .lp-arrow { transition: transform 0.2s; }
+        .lp-btn:hover:not(:disabled) .lp-arrow { transform: translateX(4px); }
+
+        .lp-spinner {
+          width: 17px; height: 17px;
           border: 2.5px solid rgba(255,255,255,0.3);
           border-top-color: #fff;
           border-radius: 50%;
-          animation: spin 0.7s linear infinite;
+          animation: spin-cw 0.7s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .lp-security {
+          display: flex; align-items: center; justify-content: center; gap: 6px;
+          margin-top: clamp(12px, 2.4vh, 22px);
+          font-size: 12px; font-weight: 500; color: #94a3b8;
+        }
+        .lp-security svg { color: #22c55e; }
 
-        /* Security note */
-        .ssp-security {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          font-size: 11px;
-          color: #d1d5db;
-          font-weight: 500;
+        /* ─────────── Responsive ─────────── */
+        @media (max-width: 960px) {
+          .lp-left { display: none; }
+          .lp-right { width: 100%; min-width: 0; padding: 40px 24px; }
+          .lp-right::before { width: 100%; height: 4px; bottom: auto; background: linear-gradient(90deg, var(--brand-bright), var(--sky) 50%, var(--amber)); }
+        }
+
+        @media (max-height: 760px) {
+          .lp-status { display: none; }
+          .lp-heading { font-size: 26px; }
+        }
+        @media (max-height: 640px) {
+          .lp-security { display: none; }
+          .lp-desc { display: none; }
+        }
+        @media (max-height: 700px) {
+          .lp-pitch p, .lp-trust { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .lp-root *, .lp-root *::before, .lp-root *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+          }
         }
       `}</style>
 
-      <div className="ssp-root">
+      <div className="lp-root">
+        {/* ── LEFT: BRAND STAGE ── */}
+        <div className="lp-left" aria-hidden="true">
+          <div className="lp-blob b1" />
+          <div className="lp-blob b2" />
+          <div className="lp-blob b3" />
+          <div className="lp-grid" />
 
-        {/* ── LEFT ANIMATED PANEL ── */}
-        <div className="ssp-left">
-          {/* <div className="ssp-left-top">
-            <div className="ssp-left-logo">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" fill="white" fillOpacity="0.9" />
-                <path d="M12 6L17 9V15L12 18L7 15V9L12 6Z" fill="white" fillOpacity="0.2" />
-              </svg>
+          <div className="lp-left-top">
+            <img src={sspLogo} alt="" />
+          </div>
+
+          <div className="lp-pitch">
+            <h2>Every workspace tool, one sign-in</h2>
+            <p>Companies, contacts, emails and HR in one portal, shown to you based on your access.</p>
+          </div>
+
+          <div className="lp-stage">
+            <div className="lp-ring outer">
+              <div className="lp-spin">
+                {RING_OUTER.map((item) => (
+                  <Chip key={item.label} item={item} />
+                ))}
+              </div>
             </div>
-            <div>
-              <div className="ssp-left-brand">Indexel</div>
-              <div className="ssp-left-sub">Self Service Portal</div>
+
+            <div className="lp-ring inner">
+              <div className="lp-spin">
+                <div className="lp-comet" />
+                {RING_INNER.map((item) => (
+                  <Chip key={item.label} item={item} accent />
+                ))}
+              </div>
             </div>
-          </div> */}
 
-          {/* Animated SVG Scene */}
-          <svg
-            width="100%"
-            viewBox="0 0 400 460"
-            style={{ maxWidth: 420, position: "relative", zIndex: 2 }}
-          >
-            {/* Ground shadows */}
-            <ellipse cx="200" cy="430" rx="120" ry="15" fill="rgba(0,0,0,0.13)" />
-            <ellipse cx="108" cy="415" rx="42" ry="9" fill="rgba(0,0,0,0.10)" />
-            <ellipse cx="295" cy="415" rx="42" ry="9" fill="rgba(0,0,0,0.10)" />
-
-            {/* ── Central phone/dashboard device ── */}
-            <g className="float1" style={{ transformOrigin: "200px 290px" }}>
-              <rect x="158" y="188" width="96" height="168" rx="14" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5" />
-              <rect x="166" y="202" width="80" height="118" rx="7" fill="rgba(255,255,255,0.08)" />
-              <rect x="172" y="210" width="54" height="8" rx="4" fill="rgba(255,255,255,0.65)" />
-              <rect x="172" y="223" width="38" height="5" rx="2.5" fill="rgba(255,255,255,0.3)" />
-              <circle cx="206" cy="255" r="20" fill="rgba(108,43,217,0.45)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5" />
-              <path d="M197 255L203 262L215 248" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pulse" />
-              <rect x="172" y="284" width="72" height="5" rx="2.5" fill="rgba(255,255,255,0.22)" />
-              <rect x="172" y="294" width="50" height="5" rx="2.5" fill="rgba(255,255,255,0.16)" />
-              <rect x="172" y="304" width="60" height="5" rx="2.5" fill="rgba(255,255,255,0.16)" />
-              <circle cx="206" cy="344" r="7" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.38)" strokeWidth="1" />
-            </g>
-
-            {/* ── Left figure (woman) ── */}
-            <g className="float2" style={{ transformOrigin: "108px 350px" }}>
-              <circle cx="108" cy="286" r="16" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.55)" strokeWidth="1" />
-              <path d="M94 283 Q96 268 108 267 Q120 268 122 283" fill="rgba(108,43,217,0.65)" stroke="none" />
-              <rect x="92" y="302" width="32" height="62" rx="7" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.38)" strokeWidth="1" />
-              <line x1="108" y1="316" x2="146" y2="300" stroke="rgba(255,255,255,0.42)" strokeWidth="7" strokeLinecap="round" />
-              <rect x="96" y="362" width="12" height="35" rx="6" fill="rgba(255,255,255,0.2)" />
-              <rect x="110" y="362" width="12" height="35" rx="6" fill="rgba(255,255,255,0.2)" />
-              <rect x="99" y="310" width="18" height="23" rx="4" fill="rgba(255,255,255,0.32)" />
-              <rect x="103" y="315" width="12" height="4" rx="2" fill="rgba(108,43,217,0.7)" />
-              <rect x="103" y="321" width="8" height="3" rx="1.5" fill="rgba(108,43,217,0.4)" />
-            </g>
-
-            {/* ── Right figure (man) ── */}
-            <g className="float3" style={{ transformOrigin: "295px 350px" }}>
-              <circle cx="295" cy="284" r="16" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.55)" strokeWidth="1" />
-              <path d="M281 281 Q283 268 295 267 Q307 268 309 281" fill="rgba(59,130,246,0.55)" stroke="none" />
-              <rect x="279" y="300" width="32" height="64" rx="7" fill="rgba(59,130,246,0.28)" stroke="rgba(255,255,255,0.38)" strokeWidth="1" />
-              <line x1="279" y1="315" x2="254" y2="300" stroke="rgba(255,255,255,0.42)" strokeWidth="7" strokeLinecap="round" />
-              <rect x="283" y="362" width="12" height="35" rx="6" fill="rgba(59,130,246,0.3)" />
-              <rect x="297" y="362" width="12" height="35" rx="6" fill="rgba(59,130,246,0.3)" />
-            </g>
-
-            {/* ── Floating card — top left (chart) ── */}
-            <g className="float4" style={{ transformOrigin: "82px 138px" }}>
-              <rect x="30" y="108" width="98" height="65" rx="10" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.38)" strokeWidth="1" />
-              <text x="42" y="124" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="9" fill="rgba(255,255,255,0.6)">Analytics</text>
-              <rect x="42" y="148" width="10" height="16" rx="2" fill="rgba(255,255,255,0.4)" />
-              <rect x="56" y="138" width="10" height="26" rx="2" fill="rgba(255,255,255,0.75)" />
-              <rect x="70" y="142" width="10" height="22" rx="2" fill="rgba(255,255,255,0.55)" />
-              <rect x="84" y="132" width="10" height="32" rx="2" fill="rgba(255,255,255,0.95)" />
-              <rect x="42" y="163" width="74" height="4" rx="2" fill="rgba(255,255,255,0.15)" />
-              <rect x="42" y="163" width="52" height="4" rx="2" fill="rgba(255,255,255,0.7)" className="slide" style={{ transformOrigin: "42px 165px" }} />
-            </g>
-
-            {/* ── Floating card — top right ($) ── */}
-            <g className="float2" style={{ transformOrigin: "324px 120px" }}>
-              <rect x="272" y="90" width="100" height="65" rx="10" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.38)" strokeWidth="1" />
-              <circle cx="294" cy="117" r="16" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-              <text x="289" y="122" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="15" fontWeight="700" fill="white">$</text>
-              <text x="315" y="112" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="9" fontWeight="600" fill="rgba(255,255,255,0.9)">Revenue</text>
-              <text x="315" y="126" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="13" fontWeight="700" fill="white">+24%</text>
-              <circle cx="362" cy="100" r="5" fill="#4ade80" className="pulse2" />
-            </g>
-
-            {/* ── Floating card — mid left (tasks) ── */}
-            <g className="float3" style={{ transformOrigin: "62px 228px" }}>
-              <rect x="18" y="204" width="86" height="58" rx="9" fill="rgba(255,255,255,0.13)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-              <text x="28" y="218" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="8" fill="rgba(255,255,255,0.5)">Tasks</text>
-              <circle cx="33" cy="232" r="6" fill="rgba(74,222,128,0.7)" />
-              <path d="M30 232L32 235L37 229" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              <rect x="44" y="228" width="48" height="6" rx="3" fill="rgba(255,255,255,0.5)" />
-              <circle cx="33" cy="248" r="6" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-              <rect x="44" y="244" width="34" height="6" rx="3" fill="rgba(255,255,255,0.3)" />
-            </g>
-
-            {/* ── Floating card — mid right (notif) ── */}
-            <g className="float4" style={{ transformOrigin: "336px 222px" }}>
-              <rect x="294" y="200" width="84" height="50" rx="9" fill="rgba(255,255,255,0.13)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-              <circle cx="312" cy="218" r="8" fill="rgba(109,40,217,0.5)" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-              <text x="309" y="222" fontFamily="'Plus Jakarta Sans',sans-serif" fontSize="9" fontWeight="700" fill="white">!</text>
-              <rect x="326" y="213" width="42" height="6" rx="3" fill="rgba(255,255,255,0.6)" />
-              <rect x="326" y="222" width="28" height="4" rx="2" fill="rgba(255,255,255,0.3)" />
-              <circle cx="370" cy="208" r="5" fill="#f87171" className="pulse" />
-            </g>
-
-            {/* ── Dashed connecting arcs ── */}
-            <path d="M124 302 Q142 284 160 274" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" strokeDasharray="4 4" fill="none" className="dash" />
-            <path d="M278 300 Q264 284 256 274" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" strokeDasharray="4 4" fill="none" className="dash" />
-          </svg>
-
-          <div className="ssp-left-bottom">ISO 27001 · SOC 2 Type II · GDPR</div>
-        </div>
-
-        {/* ── RIGHT FORM PANEL ── */}
-        <div className="ssp-right">
-          <div className="ssp-right-logo">
-            <div className="ssp-right-mark">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" fill="white" fillOpacity="0.9" />
-                <path d="M12 6L17 9V15L12 18L7 15V9L12 6Z" fill="white" fillOpacity="0.2" />
-              </svg>
-            </div>
-            <div>
-              <div className="ssp-brand-content">
-                <div className="ssp-brand-logo">
-                  <img
-                    src={logo}
-                    alt="Self Service Portal"
-                  />
-                </div>
-
-                <div className="ssp-brand-sub">
-                  Self Service Portal
-                </div>
+            <div className="lp-core">
+              <div className="lp-core-disc">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4z" />
+                  <path d="M8.5 12.2l2.5 2.5 4.5-5" />
+                </svg>
               </div>
             </div>
           </div>
 
-          <div className="ssp-heading">Hello, Welcome back</div>
-          <p className="ssp-desc">Sign in to access your workspace.</p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="ssp-fg">
-              <label className="ssp-label" htmlFor="username">Username or email</label>
-              <span className="ssp-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M4 20C4 17.5 7.58 15 12 15C16.42 15 20 17.5 20 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <div className="lp-trust">
+            {["ISO 27001", "SOC 2 Type II", "GDPR"].map((t) => (
+              <span key={t}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
                 </svg>
+                {t}
               </span>
-              <input
-                id="username"
-                type="text"
-                required
-                autoComplete="username"
-                placeholder="Username or email"
-                value={form.user_name}
-                onChange={(e) => setForm({ ...form, user_name: e.target.value })}
-                className="ssp-input"
-              />
+            ))}
+          </div>
+        </div>
+
+        {/* ── RIGHT: FORM ── */}
+        <div className="lp-right">
+          <div className="lp-form-wrap">
+            <div className="lp-brand">
+              <div className="lp-brand-mark">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" fill="white" fillOpacity="0.92" />
+                  <path d="M12 6L17 9V15L12 18L7 15V9L12 6Z" fill="#285498" fillOpacity="0.35" />
+                </svg>
+              </div>
+              <div className="lp-brand-text">
+                <div className="lp-brand-logo">
+                  <img src={logo} alt="Self Service Portal" />
+                </div>
+                <div className="lp-brand-sub">Self Service Portal</div>
+              </div>
             </div>
 
-            <div className="ssp-fg">
-              <label className="ssp-label" htmlFor="password">Password</label>
-              <span className="ssp-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                  <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M8 11V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <circle cx="12" cy="16" r="1.5" fill="currentColor" />
-                </svg>
-              </span>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                required
-                autoComplete="current-password"
-                placeholder="Password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="ssp-input"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="ssp-eye"
-              >
-                {showPassword ? (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M10.58 10.58A2 2 0 0013.42 13.42M6.35 6.35C4.09 7.93 2 10.5 2 12C2 14 6 20 12 20M9.88 5.25C10.57 5.09 11.27 5 12 5C18 5 22 10 22 12C22 13.08 21.31 14.6 20 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <div className="lp-status">
+              <span className="lp-dot" />
+              All systems operational
+            </div>
+
+            <h1 className="lp-heading">Hello, welcome back</h1>
+            <p className="lp-desc">Sign in to access your workspace.</p>
+
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="lp-field">
+                <span className="lp-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.6" />
+                    <path d="M4 20C4 17.5 7.58 15 12 15C16.42 15 20 17.5 20 20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                   </svg>
+                </span>
+                <input
+                  id="username"
+                  type="text"
+                  required
+                  autoComplete="username"
+                  placeholder=" "
+                  value={form.user_name}
+                  onChange={(e) => setForm({ ...form, user_name: e.target.value })}
+                  className="lp-input"
+                />
+                <label className="lp-label" htmlFor="username">Username or email</label>
+              </div>
+
+              <div className="lp-field">
+                <span className="lp-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                    <path d="M8 11V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    <circle cx="12" cy="16" r="1.5" fill="currentColor" />
+                  </svg>
+                </span>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  placeholder=" "
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onKeyUp={(e) => setCapsOn(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onBlur={() => setCapsOn(false)}
+                  className="lp-input"
+                />
+                <label className="lp-label" htmlFor="password">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="lp-eye"
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      <path d="M10.58 10.58A2 2 0 0013.42 13.42M6.35 6.35C4.09 7.93 2 10.5 2 12C2 14 6 20 12 20M9.88 5.25C10.57 5.09 11.27 5 12 5C18 5 22 10 22 12C22 13.08 21.31 14.6 20 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" strokeWidth="1.6" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {capsOn && (
+                <div className="lp-caps" role="status">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
+                  Caps Lock is on
+                </div>
+              )}
+
+              <div className="lp-row">
+                <label className="lp-check">
+                  <input
+                    type="checkbox"
+                    checked={form.remember}
+                    onChange={(e) => setForm({ ...form, remember: e.target.checked })}
+                  />
+                  <span className="lp-box">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12.5l4.5 4.5L19 7.5" />
+                    </svg>
+                  </span>
+                  Remember me
+                </label>
+
+                <button type="button" onClick={() => navigate("/forgot-password")} className="lp-link">
+                  Forgot password?
+                </button>
+              </div>
+
+              {error && (
+                <div key={errorKey} role="alert" className="lp-error">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" />
+                    <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  </svg>
+                  {error}
+                </div>
+              )}
+
+              <button type="submit" disabled={submitting} className="lp-btn">
+                {submitting ? (
+                  <>
+                    <div className="lp-spinner" />
+                    Signing in…
+                  </>
                 ) : (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" strokeWidth="1.5" />
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
-                  </svg>
+                  <>
+                    Login
+                    <svg className="lp-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12H19M13 6L19 12L13 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </>
                 )}
               </button>
+            </form>
+
+            <div className="lp-security">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L3 7V12C3 16.97 7.02 21.61 12 23C16.98 21.61 21 16.97 21 12V7L12 2Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              256-bit encrypted session
             </div>
-
-            <div className="ssp-rem-row flex items-center justify-between w-full">
-              <label className="ssp-rem-label flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.remember}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      remember: e.target.checked,
-                    })
-                  }
-                  style={{
-                    width: 14,
-                    height: 14,
-                    accentColor: "#6c2bd9",
-                    cursor: "pointer",
-                  }}
-                />
-
-                <span>Remember me</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => navigate("/forgot-password")}
-                className="text-sm font-medium text-[#2d55a0] hover:underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-
-            {error && (
-              <div role="alert" className="ssp-error">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            <button type="submit" disabled={submitting} className="ssp-btn">
-              {submitting ? (
-                <>
-                  <div className="ssp-spinner" />
-                  Signing in…
-                </>
-              ) : (
-                <>
-                  Login
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12H19M13 6L19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="ssp-security">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 7V12C3 16.97 7.02 21.61 12 23C16.98 21.61 21 16.97 21 12V7L12 2Z" stroke="#a78bfa" strokeWidth="1.5" strokeLinejoin="round" />
-              <path d="M9 12L11 14L15 10" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            256-bit encrypted session
           </div>
         </div>
       </div>

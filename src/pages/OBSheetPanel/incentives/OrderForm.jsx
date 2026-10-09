@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams,useLocation } from "react-router-dom";
 import { getOrder, createOrder, updateOrder, getEmployeeTarget, getMarginRules, getAchievementRules } from "../../../services/incentiveService";
 import { getCurrentUser } from "../../../services/authService";
 
@@ -9,7 +9,7 @@ function inpCls(name, fieldErrors) {
     }`;
 }
 
-function Field({ label, name, type, placeholder, required, form, fieldErrors, onChange, children }) {
+function Field({ label, name, type, placeholder, required, form, fieldErrors, onChange, children, disabled }) {
   return (
     <div>
       <label className="block text-[12px] font-medium text-[#374151] mb-1">
@@ -22,7 +22,9 @@ function Field({ label, name, type, placeholder, required, form, fieldErrors, on
           value={form[name] ?? ""}
           onChange={onChange}
           placeholder={placeholder}
+          disabled={disabled}
           className={inpCls(name, fieldErrors)}
+          style={disabled ? { opacity: 0.6, cursor: "not-allowed", background: "#f3f4f6" } : undefined}
         />
       )}
       {fieldErrors[name] && <p className="text-[11.5px] text-[#ba1a1a] mt-0.5">{fieldErrors[name]}</p>}
@@ -67,7 +69,12 @@ export default function OrderForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const location = useLocation();
+
+  const isEditable = location.state?.isEditable;
+  
   const currentUser = getCurrentUser();
+  
   const salesperson = currentUser?.employee_id ?? currentUser?.id ?? "";
 
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -79,6 +86,7 @@ export default function OrderForm() {
   const [target, setTarget] = useState(null);
   const [marginRules, setMarginRules] = useState([]);
   const [achievementRules, setAchievementRules] = useState([]);
+  const [isFrozen, setIsFrozen] = useState(!isEditable);
 
   // Fetch target + margin rules on mount
   useEffect(() => {
@@ -253,6 +261,10 @@ export default function OrderForm() {
   }
 
   const fieldProps = { form, fieldErrors, onChange: handleChange };
+  const frozenFieldProps = (fieldName) => ({ 
+    ...fieldProps, 
+    disabled: isFrozen && fieldName !== "invoice_no" && fieldName !== "invoice_date" 
+  });
 
   return (
     <>
@@ -309,6 +321,17 @@ export default function OrderForm() {
         </div>
       )}
 
+      {/* Frozen order notice */}
+      {isFrozen && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-[#f5f3ff] border border-[#e0e7ff] px-4 py-3">
+          <span className="material-symbols-outlined text-[#3730a3] text-[18px]">lock</span>
+          <div className="flex-1">
+            <p className="text-[13px] font-semibold text-[#3730a3]">Frozen Order</p>
+            <p className="text-[12px] text-[#6b7280] mt-0.5">This order is frozen. You can only edit Invoice Number and Invoice Date.</p>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="bg-[#f8fafd] rounded-xl border border-[#c5d3e4]/20 py-16 flex flex-col items-center gap-2">
           <span className="material-symbols-outlined text-[#a6bcee] text-[28px] animate-spin">progress_activity</span>
@@ -323,11 +346,11 @@ export default function OrderForm() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              <Field label="Invoice No" name="invoice_no" placeholder="e.g. INV-2024-001" {...fieldProps} />
-              <Field label="Invoice Date" name="invoice_date" type="date" {...fieldProps} />
+              <Field label="Invoice No" name="invoice_no" placeholder="e.g. INV-2024-001" {...frozenFieldProps("invoice_no")} />
+              <Field label="Invoice Date" name="invoice_date" type="date" {...frozenFieldProps("invoice_date")} />
 
               <div className="sm:col-span-2">
-                <Field label="Plant / Customer" name="plant_customer" placeholder="e.g. Tata Motors, Pune" required {...fieldProps} />
+                <Field label="Plant / Customer" name="plant_customer" placeholder="e.g. Tata Motors, Pune" required {...frozenFieldProps("plant_customer")} />
               </div>
 
               <div className="sm:col-span-2">
@@ -338,14 +361,16 @@ export default function OrderForm() {
                   onChange={handleChange}
                   rows={2}
                   placeholder="Brief description of items..."
+                  disabled={isFrozen}
                   className="w-full rounded-lg border border-[#c5d3e4]/50 px-3 py-2 text-[13px] text-[#111827] outline-none focus:border-[#2d55a0] focus:ring-2 focus:ring-[#2d55a0]/10 bg-[#f8fafd] resize-none transition-all"
+                  style={isFrozen ? { opacity: 0.6, cursor: "not-allowed", background: "#f3f4f6" } : undefined}
                 />
               </div>
 
-              <Field label="PO Number" name="po_number" placeholder="e.g. PO-12345" required {...fieldProps} />
-              <Field label="PO Date" name="po_date" type="date" required {...fieldProps} />
-              <Field label="PO Value (₹)" name="po_value" type="number" placeholder="e.g. 500000" required {...fieldProps} />
-              <Field label="PO Value After Sharing (₹)" name="po_value_after_sharing" type="number" placeholder="Leave blank to use PO Value" {...fieldProps} />
+              <Field label="PO Number" name="po_number" placeholder="e.g. PO-12345" required {...frozenFieldProps("po_number")} />
+              <Field label="PO Date" name="po_date" type="date" required {...frozenFieldProps("po_date")} />
+              <Field label="PO Value (₹)" name="po_value" type="number" placeholder="e.g. 500000" required {...frozenFieldProps("po_value")} />
+              <Field label="PO Value After Sharing (₹)" name="po_value_after_sharing" type="number" placeholder="Leave blank to use PO Value" {...frozenFieldProps("po_value_after_sharing")} />
 
               <div>
                 <label className="block text-[12px] font-medium text-[#374151] mb-1">
@@ -355,7 +380,9 @@ export default function OrderForm() {
                   name="new_product_customer"
                   value={form.new_product_customer}
                   onChange={handleChange}
+                  disabled={isFrozen}
                   className={inpCls("new_product_customer", fieldErrors)}
+                  style={isFrozen ? { opacity: 0.6, cursor: "not-allowed", background: "#f3f4f6" } : undefined}
                 >
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
@@ -365,7 +392,7 @@ export default function OrderForm() {
                 )}
               </div>
 
-              <Field label="Margin %" name="margin_percent" type="number" placeholder="e.g. 22" required {...fieldProps} />
+              <Field label="Margin %" name="margin_percent" type="number" placeholder="e.g. 22" required {...frozenFieldProps("margin_percent")} />
 
               <div className="sm:col-span-2">
                 <label className="block text-[12px] font-medium text-[#374151] mb-1">Remarks</label>
@@ -375,7 +402,9 @@ export default function OrderForm() {
                   onChange={handleChange}
                   rows={2}
                   placeholder="Optional remarks..."
+                  disabled={isFrozen}
                   className="w-full rounded-lg border border-[#c5d3e4]/50 px-3 py-2 text-[13px] text-[#111827] outline-none focus:border-[#2d55a0] focus:ring-2 focus:ring-[#2d55a0]/10 bg-[#f8fafd] resize-none transition-all"
+                  style={isFrozen ? { opacity: 0.6, cursor: "not-allowed", background: "#f3f4f6" } : undefined}
                 />
               </div>
 
