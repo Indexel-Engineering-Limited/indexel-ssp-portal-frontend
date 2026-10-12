@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { getAllEmployees } from "../../../services/employeeService";
-import { getOrdersByEmployee } from "../../../services/incentiveService";
+import { getOrdersByEmployee, getTargets } from "../../../services/incentiveService";
 import api from "../../../services/api";
 
 // ─── helpers ──────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ export default function EmployeeOrdersPanel() {
   const [employees, setEmployees]       = useState([]);
   const [empLoading, setEmpLoading]     = useState(true);
   const [selectedEmpId, setSelectedEmpId] = useState("");
+  const [targets, setTargets]           = useState([]);
 
   const [orders, setOrders]             = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -49,10 +50,16 @@ export default function EmployeeOrdersPanel() {
 
   const rowCountRef = useRef(null);
 
-  // ── Load employees ───────────────────────────────────────────────────────
+  // ── Load employees and targets ───────────────────────────────────────────
   useEffect(() => {
-    getAllEmployees()
-      .then((data) => setEmployees(Array.isArray(data) ? data : []))
+    Promise.all([
+      getAllEmployees().catch(() => []),
+      getTargets().catch(() => [])
+    ])
+      .then(([employeesData, targetsData]) => {
+        setEmployees(Array.isArray(employeesData) ? employeesData : []);
+        setTargets(Array.isArray(targetsData) ? targetsData : []);
+      })
       .catch(() => {})
       .finally(() => setEmpLoading(false));
   }, []);
@@ -165,7 +172,16 @@ export default function EmployeeOrdersPanel() {
             className={`flex-1 ${inpCls}`}
           >
             <option value="">{empLoading ? "Loading employees…" : "Select employee"}</option>
-            {employees.map((emp) => (
+            {employees
+              .filter((emp) => {
+                // Only show employees who have targets assigned
+                const empId = emp.employee_id ?? emp.id;
+                return targets.some((target) => 
+                  String(target.employee_id) === String(empId) || 
+                  String(target.salesperson) === String(empId)
+                );
+              })
+              .map((emp) => (
               <option key={emp.id} value={emp.employee_id ?? emp.id}>
                 {emp.name} — {emp.employee_id}
                 {emp.designation ? ` (${emp.designation})` : ""}
