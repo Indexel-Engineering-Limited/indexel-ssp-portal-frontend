@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getOrders, getEmployeeTarget } from "../../../services/incentiveService";
+import { getOrders, getEmployeeTarget,getAchievementRules } from "../../../services/incentiveService";
 import { getCurrentUser } from "../../../services/authService";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -34,6 +34,7 @@ export default function IncentiveOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [target, setTarget] = useState(null);
+  const [achievementRules, setAchievementRules] = useState([]);
 
   async function load() {
     setLoading(true);
@@ -45,9 +46,25 @@ export default function IncentiveOrders() {
         getOrders(),
         empId ? getEmployeeTarget(empId).catch(() => null) : Promise.resolve(null),
       ]);
-      console.log(targetData[0]);
+      console.log('Target Data:', targetData?.[0]);
       setOrders(Array.isArray(data) ? data : []);
-      setTarget(targetData[0]);
+      const targetRecord = targetData?.[0];
+      setTarget(targetRecord);
+      
+      // Fetch achievement rules if we have a scheme_id
+      if (targetRecord?.scheme_id) {
+        try {
+          const rules = await getAchievementRules(targetRecord.scheme_id);
+          console.log('Achievement Rules loaded:', rules);
+          setAchievementRules(Array.isArray(rules) ? rules : []);
+        } catch (rulesErr) {
+          console.error('Failed to load achievement rules:', rulesErr);
+          setAchievementRules([]);
+        }
+      } else {
+        console.log('No scheme_id found in target');
+        setAchievementRules([]);
+      }
     } catch (err) {
       setError(err.message ?? "Failed to load orders");
     } finally {
@@ -147,13 +164,57 @@ export default function IncentiveOrders() {
         }, 0);
         const achPct = targetAmt > 0 ? (achieved / targetAmt) * 100 : 0;
         const capped = Math.min(achPct, 100);
-        const netEarned =
-          achPct >= 70
-            ? orders.reduce(
-              (sum, o) => sum + (Number(o.net_incentive) || 0),
-              0
-            )
-            : null;
+        
+        // Calculate net incentive based on achievement rules
+        let netEarned = null;
+        let incentiveTypeLabel = null;
+        if (achPct >= 70 && achievementRules.length > 0) {
+          // Find matching achievement rule
+          const matchingRule = achievementRules
+            .filter(r => achPct >= Number(r.min_achievement) && achPct <= Number(r.max_achievement))
+            .sort((a, b) => Number(b.min_achievement) - Number(a.min_achievement))[0];
+          
+          console.log('Achievement %:', achPct);
+          console.log('Achievement Rules:', achievementRules);
+          console.log('Matching Rule:', matchingRule);
+          
+          if (matchingRule) {
+            const incentiveType = matchingRule.incentive_type;
+            const incentiveRate = Number(matchingRule.incentive_rate) || 0;
+            
+            console.log('Incentive Type:', incentiveType);
+            console.log('Incentive Rate:', incentiveRate);
+            
+            if (incentiveType === 'MONTHLY_SALARY') {
+              
+              netEarned = "Monthly Salary";
+              incentiveTypeLabel = 'Monthly Salary';
+              console.log('Monthly Salary:', monthlySalary, '× Rate:', incentiveRate, '= Incentive:', netEarned);
+            } else if (incentiveType === 'BILLING_PERCENT') {
+              incentiveTypeLabel = 'Billing %';
+              // Calculate total billing: sum of (po_value_after_sharing * multiplier) for each order
+              const totalBilling = orders.reduce((sum, order) => {
+                const poSharing = order.po_value_after_sharing != null && order.po_value_after_sharing !== ""
+                  ? Number(order.po_value_after_sharing)
+                  : Number(order.po_value) || 0;
+                const multiplier = Number(order.margin_multiplier) || 0;
+                return sum + (poSharing * multiplier);
+              }, 0);
+              
+              console.log('Total Billing:', totalBilling);
+              // Multiply total billing by incentive rate (as percentage)
+              netEarned = totalBilling * (incentiveRate / 100);
+              console.log('Billing:', totalBilling, '× Rate:', incentiveRate, '% = Incentive:', netEarned);
+            }
+          }
+        } else if (achPct >= 70) {
+          // Fallback to old calculation if no achievement rules
+          netEarned = orders.reduce(
+            (sum, o) => sum + (Number(o.net_incentive) || 0),
+            0
+          );
+        }
+        
         const remaining = Math.max(0, targetAmt * 0.7 - achieved);
         const isEligible = achPct >= 70;
         const barColor = achPct >= 100 ? "#16a34a" : achPct >= 70 ? "#2d55a0" : achPct >= 50 ? "#d97706" : "#ba1a1a";
@@ -211,6 +272,11 @@ export default function IncentiveOrders() {
                       ? `₹${netEarned.toLocaleString("en-IN")}`
                       : "—"}
                   </p>
+                  {incentiveTypeLabel && (
+                    <p className="text-[10px] font-medium text-[#6b7280] mt-1">
+                      {incentiveTypeLabel}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -240,7 +306,7 @@ export default function IncentiveOrders() {
                 <div className="flex items-center gap-2 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
                   <span className="material-symbols-outlined text-[#166534] text-[16px]">check_circle</span>
                   <span className="text-[12.5px] text-[#166534] font-medium">
-                    {achPct.toFixed(1)}% achieved — eligible for incentive. Net earned: ₹{netEarned.toLocaleString("en-IN")}
+                    {achPct.toFixed(1)}% achieved — eligible for incentive. Net earned: ₹{netEarned?.toLocaleString("en-IN")}
                   </span>
                 </div>
               ) : (
@@ -339,7 +405,6 @@ export default function IncentiveOrders() {
                             <button
                               type="button"
                               onClick={() =>{
-                                console.log("isEditable:", order.isEditable);
                                 navigate(`/ob-sheet/incentives/orders/${order.id}/edit`, {
                                   state: { isEditable: order.isEditable },
                                 })

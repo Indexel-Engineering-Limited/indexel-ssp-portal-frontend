@@ -86,7 +86,7 @@ export default function OrderForm() {
   const [target, setTarget] = useState(null);
   const [marginRules, setMarginRules] = useState([]);
   const [achievementRules, setAchievementRules] = useState([]);
-  const [isFrozen, setIsFrozen] = useState(!isEditable);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   // Fetch target + margin rules on mount
   useEffect(() => {
@@ -120,6 +120,9 @@ export default function OrderForm() {
     getOrder(id)
       .then((data) => {
         if (data) {
+          // Set frozen state based on isEditable field
+          setIsFrozen(data.isEditable === 0);
+          
           setForm({
             invoice_no: data.invoice_no ?? "",
             invoice_date: data.invoice_date ? data.invoice_date.slice(0, 10) : "",

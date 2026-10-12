@@ -101,6 +101,10 @@ export default function EmployeeOrdersPanel() {
   }
 
   function toggleOne(id) {
+    // Check if order is frozen
+    const order = orders.find((o) => o.id === id);
+    if (order?.isEditable === 0) return; // Don't allow selecting frozen orders
+    
     setSelected((prev) => {
       const n = new Set(prev);
       n.has(id) ? n.delete(id) : n.add(id);
@@ -303,15 +307,22 @@ export default function EmployeeOrdersPanel() {
                         key={order.id}
                         className="hover:bg-[#f8fafd] transition-colors cursor-pointer"
                         style={{ background: isChecked ? "#eef2fb" : order.isEditable === 0 ? "#f5f3ff" : undefined }}
-                        onClick={() => toggleOne(order.id)}
+                        onClick={() => order.isEditable !== 0 && toggleOne(order.id)}
+                        
                       >
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggleOne(order.id)}
-                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#2d55a0]"
-                          />
+                          {order.isEditable === 0 ? (
+                            <div className="flex items-center justify-center" title="Frozen - cannot be selected">
+                              <span className="material-symbols-outlined text-[#3730a3] text-[16px]">lock</span>
+                            </div>
+                          ) : (
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleOne(order.id)}
+                              className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#2d55a0]"
+                            />
+                          )}
                         </td>
                         <td className="px-4 py-3 text-[#6b7280]">{idx + 1}</td>
                         <td className="px-4 py-3 font-medium">{order.invoice_no || "—"}</td>
