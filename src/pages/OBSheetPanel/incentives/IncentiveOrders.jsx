@@ -189,7 +189,7 @@ export default function IncentiveOrders() {
               
               netEarned = "Monthly Salary";
               incentiveTypeLabel = 'Monthly Salary';
-              console.log('Monthly Salary:', monthlySalary, '× Rate:', incentiveRate, '= Incentive:', netEarned);
+              
             } else if (incentiveType === 'BILLING_PERCENT') {
               incentiveTypeLabel = 'Billing %';
               // Calculate total billing: sum of (po_value_after_sharing * multiplier) for each order

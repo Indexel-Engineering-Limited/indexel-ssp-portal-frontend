@@ -403,7 +403,7 @@ export default function LoginPage() {
           box-shadow: 0 8px 20px rgba(40,84,152,0.3);
         }
         .lp-brand-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .lp-brand-logo { width: 150px; height: 68px; }
+        .lp-brand-logo { width: 150px; height: auto; }
         .lp-brand-logo img { width: 100%; height: 100%; object-fit: contain; object-position: left center; display: block; }
         .lp-brand-sub { font-size: 16px; font-weight: 600; color: var(--brand); letter-spacing: 0.02em;font-family:cursive;margin-left:12px;font-style:italic; }
 
