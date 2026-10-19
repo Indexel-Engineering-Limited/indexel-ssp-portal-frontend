@@ -92,7 +92,6 @@ export default function OrderForm() {
   useEffect(() => {
     const empId = currentUser?.employee_id ?? currentUser?.id;
     if (!empId) return;
-
     getEmployeeTarget(empId)
       .then((data) => {
         const t = Array.isArray(data) ? data[0] : data;
@@ -177,7 +176,6 @@ export default function OrderForm() {
     if (isNaN(multiplier)) return null;
 
     // 3. Calculate base incentive from PO sharing
-    // Example: 10000 × 0.6% = 60
     const baseIncentive = poSharing * (multiplier / 100);
 
     // 4. Calculate incentive for EVERY achievement rule

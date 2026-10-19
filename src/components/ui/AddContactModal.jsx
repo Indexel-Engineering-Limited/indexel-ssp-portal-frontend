@@ -12,14 +12,21 @@ const EMPTY_FORM = {
 const DEPARTMENTS = [
   "Electrical",
   "Instrumentation",
-  "P&I",
+  "E&I",
   "Purchase",
   "Projects",
-  "Equipments and Sustainability",
   "Mechanical",
+  "Maintenance",
+  "Engineering",
+  "Production / Operations",
+  "Environment / Sustainability",
+  "Stores",
+  "Energy / Power",
+  "Quality / QA-QC",
   "Safety",
   "Process Planning",
   "Management",
+  "IT / OT",
 ];
 const COUNTRY_CODES = [
   { code: "+91", country: "India" },
