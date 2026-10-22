@@ -149,7 +149,7 @@ export default function DashboardPage() {
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-semibold text-[#24252A]">{c.person_name || "Unnamed"}</p>
                     <p className="mt-0.5 truncate text-[11.5px] text-[#6b7280]">
-                      {companyNames.get(String(c.company_details_id)) || `Company ${c.company_details_id}`} &bull; {c.designation || "—"}
+                      {companyNames.get(String(c.company_id)) || `Company: ${c.company_name}`} &bull; {c.designation || "—"}
                     </p>
                   </div>
                   <span className="shrink-0 text-[11px] text-[#6b7280]">{formatDate(c.created_at)}</span>
