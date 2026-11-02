@@ -61,7 +61,9 @@ api.interceptors.response.use(
       error.response?.data?.error ??
       error.message ??
       "An unexpected error occurred";
-    return Promise.reject(new Error(message));
+    const wrapped = new Error(message);
+    wrapped.status = error.response?.status;
+    return Promise.reject(wrapped);
   }
 );
 

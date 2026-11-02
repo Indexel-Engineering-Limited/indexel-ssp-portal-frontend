@@ -9,7 +9,7 @@ const ROUTE_MAP = {
   bulk_upload: { to: "/bulk-upload", end: false }, user_access: { to: "/user-access", end: false }, user_logs: { to: "/user-logs", end: false }, users: { to: "/users", end: false },
   employee_list: { to: "/hr-management", end: true }, incentive_dashboard: { to: "/ob-sheet/incentives", end: true }, incentive_schemes: { to: "/ob-sheet/incentives/schemes", end: false },
   incentive_orders: { to: "/ob-sheet/incentives/orders", end: false }, incentive_targets: { to: "/ob-sheet/incentives/targets", end: false },
-  incentive_manage: { to: "/ob-sheet/incentives/employee-orders", end: false },
+  incentive_manage: { to: "/ob-sheet/incentives/employee-orders", end: false }, service_calls: { to: "/service-calls", end: false },
 };
 const iconFor = (name = "") => {
   const key = name.toLowerCase();

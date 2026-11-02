@@ -30,6 +30,7 @@ import OrderForm             from "./pages/OBSheetPanel/incentives/OrderForm";
 import IncentiveCalculations from "./pages/OBSheetPanel/incentives/IncentiveCalculations";
 import EmployeeTargets       from "./pages/OBSheetPanel/incentives/EmployeeTargets";
 import EmployeeOrdersPanel   from "./pages/OBSheetPanel/incentives/EmployeeOrdersPanel";
+import ServiceCallsPage      from "./pages/ServiceCallsPage";
 
 function RequireAuth() {
   const location = useLocation();
@@ -103,6 +104,10 @@ export default function App() {
             </Route>
             <Route element={<RequirePermission moduleKey="bulk_upload" />}>
               <Route path="/ob-sheet" element={<OBSheetTable />} />
+            </Route>
+
+            <Route element={<RequirePermission moduleKey="service_calls" />}>
+              <Route path="/service-calls" element={<ServiceCallsPage />} />
             </Route>
 
             {/* Sales Incentive Management */}

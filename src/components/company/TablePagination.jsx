@@ -1,4 +1,4 @@
-﻿﻿export default function TablePagination({ total, page, pageSize, totalPages, onChange }) {
+﻿﻿export default function TablePagination({ total, page, pageSize, totalPages, onChange, itemLabel = "companies" }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
 
@@ -17,7 +17,7 @@
         ) : (
           <>
             Showing <span className="text-[#111827] font-medium">{from}-{to}</span> of{" "}
-            <span className="text-[#111827] font-medium">{total.toLocaleString()}</span> companies
+            <span className="text-[#111827] font-medium">{total.toLocaleString()}</span> {itemLabel}
           </>
         )}
       </div>
