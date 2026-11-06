@@ -40,6 +40,7 @@
             ))}
           </select>
         </label>
+        {onExportCSV && (
         <button
           onClick={onExportCSV}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#f8fafd] border border-[#c5d3e4]/50 rounded-lg text-[12.5px] font-medium text-[#111827] hover:bg-[#eef2fb] transition-colors shadow-sm"
@@ -47,6 +48,7 @@
           <span className="material-symbols-outlined text-[#6b7280] text-[15px]">download</span>
           <span className="hidden sm:inline">Export CSV</span>
         </button>
+        )}
         {canAdd && (
           <button
             onClick={onAddCompany}

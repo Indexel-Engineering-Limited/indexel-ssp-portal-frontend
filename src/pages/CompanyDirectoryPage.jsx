@@ -6,7 +6,7 @@ import AddCompanyModal from "../components/ui/AddCompanyModal";
 import EditCompanyModal from "../components/ui/EditCompanyModal";
 import { createCompany, getAllCompanies, updateCompany } from "../services/companyService";
 import { normalizeCompany } from "../utils/mappers";
-import { canWriteModule } from "../services/authService";
+import { canWriteModule, isAdmin } from "../services/authService";
 import OverviewStats from "../components/ui/ix/OverviewStats";
 
 const DEFAULT_FILTERS = {
@@ -139,7 +139,7 @@ export default function CompanyDirectoryPage() {
       <CompanyDirectoryHeader
         total={companies.length}
         onAddCompany={() => setShowAddModal(true)}
-        onExportCSV={() => exportToCSV(filtered)}
+        onExportCSV={isAdmin() ? () => exportToCSV(filtered) : undefined}
         canAdd={canAdd}
         pageSize={pageSize}
         pageSizeOptions={PAGE_SIZE_OPTIONS}

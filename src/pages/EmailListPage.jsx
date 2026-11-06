@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import TablePagination from "../components/company/TablePagination";
 import { createEmailsBulk, getEmailList, deleteEmail, updateEmailType } from "../services/companyService";
 import { downloadEmailSampleExcel, parseEmailsExcel } from "../utils/contactExcel";
-import { canWriteModule } from "../services/authService";
+import { canWriteModule, isAdmin } from "../services/authService";
 import OverviewStats from "../components/ui/ix/OverviewStats";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -219,7 +219,7 @@ export default function EmailListPage() {
 
         <div className="flex w-full sm:w-auto items-center gap-2">
           {canEdit && <><button type="button" onClick={downloadEmailSampleExcel} className="inline-flex items-center gap-1.5 rounded-lg border border-[#c5d3e4]/50 bg-[#f8fafd] px-3 py-2 text-[12.5px] font-medium text-[#111827] hover:bg-[#f0f4fa]"><span className="material-symbols-outlined text-[16px]">download</span>Sample Excel</button><button type="button" onClick={() => emailInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 rounded-lg bg-[#2d55a0] px-3 py-2 text-[12.5px] font-medium text-white hover:bg-[#234690] disabled:cursor-not-allowed disabled:opacity-50"><span className="material-symbols-outlined text-[16px]">upload_file</span>{uploading ? "Uploading..." : "Upload Excel"}</button><input ref={emailInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleEmailUpload} /></>}
-          <button type="button" onClick={exportEmails} disabled={!filteredEmails.length} className="inline-flex items-center gap-1.5 rounded-lg border border-[#c5d3e4]/50 bg-[#f8fafd] px-3 py-2 text-[12.5px] font-medium text-[#111827] hover:bg-[#f0f4fa] disabled:cursor-not-allowed disabled:opacity-50"><span className="material-symbols-outlined text-[16px]">download</span>Export</button>
+          {isAdmin() && <button type="button" onClick={exportEmails} disabled={!filteredEmails.length} className="inline-flex items-center gap-1.5 rounded-lg border border-[#c5d3e4]/50 bg-[#f8fafd] px-3 py-2 text-[12.5px] font-medium text-[#111827] hover:bg-[#f0f4fa] disabled:cursor-not-allowed disabled:opacity-50"><span className="material-symbols-outlined text-[16px]">download</span>Export</button>}
           <label className="flex items-center gap-2 text-[12px] text-[#374151] whitespace-nowrap">
             Show
             <select value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); }} className="rounded-lg border border-[#c5d3e4]/50 bg-[#f8fafd] px-2 py-2 text-[13px] text-[#111827] outline-none focus:border-[#2d55a0]">
