@@ -3,6 +3,8 @@ import TablePagination from "../components/company/TablePagination";
 import { getAllContacts } from "../services/companyService";
 import { normalizeContact } from "../utils/mappers";
 import OverviewStats from "../components/ui/ix/OverviewStats";
+import * as XLSX from "xlsx";
+import { isAdmin } from "../services/authService";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -87,6 +89,21 @@ export default function ContactsListPage() {
     { label: "Designations", value: new Set(contacts.map((item) => item.designation).filter(Boolean)).size.toLocaleString(), detail: "Across the directory" },
   ];
 
+  function exportContacts() {
+    const worksheet = XLSX.utils.json_to_sheet(filteredContacts.map((contact) => ({
+      "Customer Name": contact.company_name ?? "",
+      "Contact Person": contact.person_name ?? "",
+      Department: contact.department ?? "",
+      Designation: contact.designation ?? "",
+      Email: contact.email ?? "",
+      Phone: contact.contact_number ?? "",
+    })));
+    worksheet["!cols"] = [{ wch: 40 }, { wch: 26 }, { wch: 18 }, { wch: 22 }, { wch: 34 }, { wch: 16 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Contacts");
+    XLSX.writeFile(workbook, "contacts_list.xlsx");
+  }
+
   function handleSearchChange(event) {
     setSearch(event.target.value);
     setPage(1);
@@ -113,6 +130,17 @@ export default function ContactsListPage() {
         </div>
 
         <div className="flex w-full sm:w-auto items-center gap-2">
+          {isAdmin() && (
+            <button
+              type="button"
+              onClick={exportContacts}
+              disabled={loading || !filteredContacts.length}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#c5d3e4]/50 bg-[#f8fafd] px-3 py-2 text-[12.5px] font-medium text-[#111827] hover:bg-[#f0f4fa] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[16px]">download</span>
+              Export
+            </button>
+          )}
           <label className="flex items-center gap-2 text-[12px] text-[#374151] whitespace-nowrap">
             Show
             <select
